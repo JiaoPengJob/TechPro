@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="500dp"
+    android:layout_height="500dp"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="@string/exam_dialog_first"
+        android:textColor="@color/content"
+        android:textSize="22sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:text="@string/exam_dialog_second"
+        android:textColor="@color/content"
+        android:textSize="22sp" />
+
+    <TableLayout
+        android:layout_width="600dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="45dp"
+        android:background="@drawable/sure_exit_two"
+        android:stretchColumns="0,2">
+
+        <TableRow>
+
+            <Button
+                android:id="@+id/bt_dialog_exam_exit"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:background="@null" />
+
+            <View
+                android:layout_width="0.5dp"
+                android:layout_height="80dp"
+                android:background="@color/greny_cc"></View>
+
+            <Button
+                android:id="@+id/bt_dialog_exam_sure"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:background="@null" />
+
+        </TableRow>
+
+    </TableLayout>
+
+
+</LinearLayout>

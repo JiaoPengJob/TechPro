@@ -1,0 +1,58 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+    useLibrary 'org.apache.http.legacy'
+
+    defaultConfig {
+        applicationId "cn.hongjitech.vehicle"
+        minSdkVersion 15
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+
+        ndk {
+            // 设置支持的 SO 库构架
+            abiFilters 'armeabi', 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64', 'mips', 'mips64'
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+apply plugin: 'com.bugtags.library.plugin'
+
+//Bugtags 插件配置
+bugtags {
+    //自动上传符号表功能配置，如果需要根据 build varint 配置，请参考插件详细使用说明
+    appKey "d2c8767593a09875001bd3eb99eb844e"  //这里是你的 appKey
+    appSecret "3a148ccd150d8ea58c012bf3e28e636a"    //这里是你的 appSecret，管理员在设置页可以查看
+    mappingUploadEnabled true
+    //网络跟踪功能配置(企业版)
+    trackingNetworkEnabled true
+}
+
+dependencies {
+    provided fileTree(include: ['*.jar'], dir: 'libs')
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.jakewharton:butterknife:6.1.0'
+    compile 'com.github.gcacace:signature-pad:1.2.0'
+    compile 'com.android.volley:volley:1.0.0'
+    compile 'com.squareup.okhttp3:okhttp:3.3.1'
+    compile 'com.google.code.gson:gson:2.6.2'
+    compile project(':library')
+    compile files('src/libs/zkandroidcore.jar')
+    compile files('src/libs/zkandroidfpreader.jar')
+    compile files('src/libs/zkandroididcardreader.jar')
+    compile 'com.android.support:design:23.0.0'
+    compile 'com.bugtags.library:bugtags-lib:latest.integration'
+    compile files('src/libs/httpmime-4.2.5.jar')
+    compile files('src/main/jniLibs/eventbus-3.0.0.jar')
+}

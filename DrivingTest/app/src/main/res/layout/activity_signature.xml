@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/height_60"
+        android:background="@color/blue"
+        android:gravity="center_vertical"
+        android:paddingLeft="13dp"
+        android:text="@string/title_main"
+        android:textColor="@color/greay"
+        android:textSize="@dimen/font_30" />
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="5dp"
+        android:stretchColumns="*">
+
+        <TableRow>
+
+            <LinearLayout
+                android:layout_width="200dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/border"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/height_38"
+                        android:background="@color/blue"
+                        android:gravity="center_vertical"
+                        android:paddingLeft="13dp"
+                        android:text="@string/exam_info"
+                        android:textColor="@color/greay"
+                        android:textSize="@dimen/font_18" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:padding="20dp">
+
+                        <ImageView
+                            android:layout_width="@dimen/height_125"
+                            android:layout_height="@dimen/height_160"
+                            android:layout_marginLeft="5dp"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/train_photo" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="30dp"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/train_name"
+                                    android:textColor="@color/content"
+                                    android:textSize="@dimen/font_16" />
+
+                                <TextView
+                                    android:id="@+id/tv_signature_mark_user_name"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="10dp"
+                                    android:textColor="@color/content"
+                                    android:textSize="@dimen/font_16" />
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/train_code"
+                                    android:textColor="@color/content"
+                                    android:textSize="@dimen/font_16" />
+
+                                <TextView
+                                    android:id="@+id/tv_signature_mark_user_idCode"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="10dp"
+                                    android:textColor="@color/content"
+                                    android:textSize="@dimen/font_16" />
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/assess_examtime"
+                                    android:textColor="@color/content"
+                                    android:textSize="@dimen/font_16" />
+
+                                <TextView
+                                    android:id="@+id/tv_signature_mark_user_time"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="10dp"
+                                    android:textColor="@color/content"
+                                    android:textSize="@dimen/font_16" />
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="用         时:"
+                                    android:textColor="@color/content"
+                                    android:textSize="@dimen/font_16" />
+
+                                <TextView
+                                    android:id="@+id/tv_signature_mark_user_useTime"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="10dp"
+                                    android:textColor="@color/content"
+                                    android:textSize="@dimen/font_16" />
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/exam_score_count"
+                                    android:textColor="@color/content"
+                                    android:textSize="@dimen/font_16" />
+
+                                <TextView
+                                    android:id="@+id/tv_signature_mark_user_num"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="10dp"
+                                    android:text="0"
+                                    android:textColor="@color/red_exam"
+                                    android:textSize="@dimen/font_16" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="次"
+                                    android:textColor="@color/content"
+                                    android:textSize="@dimen/font_16" />
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/exam_long"
+                                    android:textColor="@color/content"
+                                    android:textSize="@dimen/font_16" />
+
+                                <TextView
+                                    android:id="@+id/tv_signature_mark_user_length"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="10dp"
+                                    android:text="0m"
+                                    android:textColor="@color/content"
+                                    android:textSize="@dimen/font_16" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/border"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/height_38"
+                        android:background="@color/blue">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="30dp"
+                            android:text="@string/exam_mark_pro"
+                            android:textColor="@color/greay"
+                            android:textSize="@dimen/font_18" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:text="@string/exam_marking"
+                            android:textColor="@color/greay"
+                            android:textSize="@dimen/font_18" />
+
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginRight="45dp"
+                            android:text="@string/exam_mark_res"
+                            android:textColor="@color/greay"
+                            android:textSize="@dimen/font_18" />
+
+                    </RelativeLayout>
+
+                    <ListView
+                        android:id="@+id/lv_signature_mark_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="370dp"
+                        android:divider="@android:color/darker_gray"
+                        android:listSelector="@android:color/transparent"></ListView>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="250dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="2dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/border"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/height_38"
+                        android:background="@color/blue"
+                        android:gravity="center_vertical"
+                        android:paddingLeft="13dp"
+                        android:text="@string/signature_detail"
+                        android:textColor="@color/greay"
+                        android:textSize="@dimen/font_18" />
+
+                    <TableLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/height_34"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:stretchColumns="*">
+
+                        <TableRow>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="@string/signature_pro_name"
+                                android:textColor="@color/content"
+                                android:textSize="@dimen/font_16" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="@string/signature_test_count"
+                                android:textColor="@color/content"
+                                android:textSize="@dimen/font_16" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="@string/signature_pass_count"
+                                android:textColor="@color/content"
+                                android:textSize="@dimen/font_16" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="@string/signature_pass_rate"
+                                android:textColor="@color/content"
+                                android:textSize="@dimen/font_16" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="@string/signature_average_speed"
+                                android:textColor="@color/content"
+                                android:textSize="@dimen/font_16" />
+
+                        </TableRow>
+
+                    </TableLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/greny_cc"></View>
+
+                    <ListView
+                        android:id="@+id/lv_signature_result_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="120dp"
+                        android:listSelector="@android:color/transparent"
+                        android:divider="@android:color/darker_gray"></ListView>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="170dp"
+                    android:layout_marginTop="3dp"
+                    android:background="@drawable/border"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="5dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:text="@string/signature_stu_signature"
+                        android:textColor="@color/content"
+                        android:textSize="@dimen/font_16" />
+
+                    <RelativeLayout
+                        android:id="@+id/rl_signature_student"
+                        android:layout_width="380dp"
+                        android:layout_height="130dp"
+                        android:layout_marginLeft="20dp"
+                        android:background="@color/blue"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:id="@+id/iv_signature_student"
+                            android:layout_width="330dp"
+                            android:layout_height="100dp"
+                            android:scaleType="fitXY" />
+
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="170dp"
+                    android:layout_marginTop="3dp"
+                    android:background="@drawable/border"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="5dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:text="@string/signature_tech_signature"
+                        android:textColor="@color/content"
+                        android:textSize="@dimen/font_16" />
+
+                    <RelativeLayout
+                        android:id="@+id/rl_signature_teacher"
+                        android:layout_width="380dp"
+                        android:layout_height="130dp"
+                        android:layout_marginLeft="20dp"
+                        android:background="@color/blue"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:id="@+id/iv_signature_teacher"
+                            android:layout_width="330dp"
+                            android:layout_height="100dp"
+                            android:scaleType="fitXY" />
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:padding="15dp">
+
+                    <ImageView
+                        android:id="@+id/iv_signature_train"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/signature_test" />
+
+                    <ImageView
+                        android:id="@+id/iv_signature_test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:src="@drawable/signature_return" />
+
+                    <ImageView
+                        android:id="@+id/iv_signature_over"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:src="@drawable/test_over" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </TableRow>
+
+    </TableLayout>
+
+</LinearLayout>
+

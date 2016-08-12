@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dialog_background"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/blue"
+        android:padding="5dp">
+
+        <ImageButton
+            android:id="@+id/ib_dialog_artCode_back"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="0dp"
+            android:background="#00000000"
+            android:src="@drawable/art_return" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/art_mark_code_no"
+            android:textColor="@color/greay"
+            android:textSize="20dp" />
+
+        <Button
+            android:id="@+id/bt_dialog_artCode_sure"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="0dp"
+            android:background="#00000000"
+            android:text="@string/dialog_sure"
+            android:textColor="@color/greay"
+            android:textSize="20sp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="25dp"
+        android:background="@color/greay">
+
+        <ListView
+            android:id="@+id/lv_dialog_artCode_info"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@color/greny_cc"
+            android:dividerHeight="0.5px"></ListView>
+
+    </RelativeLayout>
+
+</LinearLayout>

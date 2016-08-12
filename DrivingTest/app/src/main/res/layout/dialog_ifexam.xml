@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="500dp"
+    android:layout_height="500dp"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="该学员身份验证未齐全,是否继续?"
+        android:textColor="@color/content"
+        android:layout_marginTop="50dp"
+        android:textSize="22sp" />
+
+    <TableLayout
+        android:layout_width="600dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/sure_exit_two"
+        android:stretchColumns="0,2">
+
+        <TableRow>
+
+            <Button
+                android:id="@+id/bt_dialog_ifexam_exit"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:background="@null" />
+
+            <View
+                android:layout_width="0.5dp"
+                android:layout_height="80dp"
+                android:background="@color/greny_cc"></View>
+
+            <Button
+                android:id="@+id/bt_dialog_ifexam_sure"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:background="@null" />
+
+        </TableRow>
+
+    </TableLayout>
+
+
+</LinearLayout>

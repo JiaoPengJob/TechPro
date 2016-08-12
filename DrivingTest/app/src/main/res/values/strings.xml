@@ -1,0 +1,66 @@
+<resources>
+    <string name="app_name">56驾考</string>
+
+
+    <string name="title_main">驾驶技能训练考试系统</string>
+    <string name="train_title_name">姓名</string>
+    <string name="train_title_sex">性别</string>
+    <string name="train_title_code">证件号</string>
+    <string name="title_content">详细信息</string>
+
+    <string name="train_name">学员姓名:</string>
+    <string name="train_coach">预约教练:</string>
+    <string name="train_time">预约时间:</string>
+    <string name="train_code">证件号码:</string>
+    <string name="train_codeIf">身份认证</string>
+
+    <string name="exam_info">学员信息</string>
+    <string name="exam_line_list">项目列表:</string>
+    <string name="exam_time_begin">开始时间:</string>
+    <string name="exam_time_use">用        时:</string>
+    <string name="exam_score_count">扣分次数:</string>
+    <string name="exam_long">已经行驶:</string>
+    <string name="exam_mark_pro">扣分项目</string>
+    <string name="exam_marking">扣分</string>
+    <string name="exam_mark_res">扣分原因</string>
+    <string name="exam_stop_time">停车计时:</string>
+    <string name="exam_stop_speed">车速:</string>
+    <string name="exam_stop_stall">档位:</string>
+
+    <string name="exam_dialog_first">结束考试后将不能再继续进行,</string>
+    <string name="exam_dialog_second">确定结束考试?</string>
+    <string name="dialog_sure">确认</string>
+    <string name="dialog_exit">取消</string>
+
+    <string name="assess_examtime">考核时间:</string>
+    <string name="assess_sorry">很抱歉!考核不合格!</string>
+    <string name="assess_success">恭喜您!考核合格!</string>
+    <string name="assess_result">考试结果</string>
+
+    <string name="test_sorry">很抱歉!考试未通过!</string>
+    <string name="test_success">恭喜您!考试通过!</string>
+
+    <string name="approve_examcode">准考证号:</string>
+    <string name="approve_reserve_car">预约车型:</string>
+    <string name="approve_reserve_num">预约次数:</string>
+    <string name="approve_security_photo">公安系统照片</string>
+    <string name="approve_exam_photo">考试签到照片</string>
+    <string name="approve_compare">身份校对</string>
+
+    <string name="art_mark">人工扣分</string>
+    <string name="art_mark_pro">扣分项目:</string>
+    <string name="art_mark_code">扣分代码:</string>
+    <string name="art_mark_fraction">扣分分值:</string>
+    <string name="art_mark_description">扣分描述:</string>
+    <string name="art_mark_code_no">扣分代码</string>
+
+    <string name="signature_detail">训练详情</string>
+    <string name="signature_pro_name">项目名称</string>
+    <string name="signature_test_count">练习次数</string>
+    <string name="signature_pass_count">及格次数</string>
+    <string name="signature_pass_rate">及格率</string>
+    <string name="signature_average_speed">平均速度</string>
+    <string name="signature_stu_signature">学员签名</string>
+    <string name="signature_tech_signature">教练签名</string>
+
+</resources>

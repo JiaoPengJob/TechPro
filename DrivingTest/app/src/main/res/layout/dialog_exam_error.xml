@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="700dp"
+    android:layout_height="500dp"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/height_38"
+        android:background="@color/blue"
+        android:gravity="center_vertical"
+        android:paddingLeft="13dp"
+        android:text="@string/assess_result"
+        android:textColor="@color/greay"
+        android:textSize="@dimen/font_18" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/iv_dialog_test_face"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="fitXY"
+            android:src="@drawable/test_success" />
+
+        <TextView
+            android:id="@+id/tv_dialog_test_face"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/test_success"
+            android:textColor="@color/red_fail"
+            android:textSize="@dimen/font_16" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="30dp"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/ib_dialog_test_returnExam"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/test_makeup"
+            android:background="#00000000" />
+
+        <ImageButton
+            android:id="@+id/ib_dialog_test_over"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/test_over"
+            android:background="#00000000"
+            android:layout_marginLeft="50dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

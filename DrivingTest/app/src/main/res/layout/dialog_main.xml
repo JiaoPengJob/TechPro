@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="退出"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:background="#00BAFF"
+        android:padding="5dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="50dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="退出密码："
+            android:textSize="18sp"
+            android:textColor="#00b3ff" />
+
+        <EditText
+            android:id="@+id/et_dialog_main_pwd"
+            android:layout_width="300dp"
+            android:layout_height="30dp"
+            android:background="@drawable/myborder"
+            android:focusable="false"
+            android:textSize="16sp"
+            android:focusableInTouchMode="false" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginBottom="50dp">
+
+        <ImageView
+            android:id="@+id/iv_dialog_main_exit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/dialog_main_eit" />
+
+        <ImageView
+            android:id="@+id/iv_dialog_main_sure"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/dialog_main_sure"
+            android:layout_marginLeft="120dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

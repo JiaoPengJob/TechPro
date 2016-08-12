@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/greay">
+
+    <RelativeLayout
+        android:id="@+id/rl_signature_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/blue"
+        android:padding="5dp">
+
+        <ImageButton
+            android:id="@+id/ib_dialog_signature_back"
+            android:layout_width="50dp"
+            android:layout_height="@dimen/height_38"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:background="#00000000"
+            android:src="@drawable/art_return" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="签名"
+            android:textColor="@color/greay"
+            android:textSize="@dimen/font_16" />
+
+    </RelativeLayout>
+
+    <com.github.gcacace.signaturepad.views.SignaturePad
+        android:id="@+id/signature_pad"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/rl_signature_top"
+        app:clearOnDoubleClick="true"
+        app:velocityFilterWeight="0.5"
+        app:penColor="@android:color/black" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="30dp">
+
+        <ImageButton
+            android:id="@+id/ib_dialog_signature_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#00000000"
+            android:enabled="false"
+            android:src="@drawable/signature_clear" />
+
+        <ImageButton
+            android:id="@+id/ib_dialog_signature_sure"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="100dp"
+            android:background="#00000000"
+            android:enabled="false"
+            android:src="@drawable/signature_sure" />
+
+    </LinearLayout>
+
+
+</RelativeLayout>

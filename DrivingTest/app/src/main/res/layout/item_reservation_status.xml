@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="15dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/tv_item_statu_time"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginLeft="22dp"
+        android:textColor="@color/content"
+        android:textSize="@dimen/font_16" />
+
+    <TextView
+        android:id="@+id/tv_item_statu_moudle"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="125dp"
+        android:gravity="center"
+        android:textColor="@color/content"
+        android:textSize="@dimen/font_16" />
+
+</LinearLayout>

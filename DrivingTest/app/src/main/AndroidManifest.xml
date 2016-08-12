@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cn.hongjitech.vehicle">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application
+        android:name=".volleyHttp.App"
+        android:allowBackup="true"
+        android:icon="@mipmap/icon"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".activity.MainActivity"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activity.TrainingActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.ExamProcessActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.AssessActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.TestActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.StuApproveActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.SignatureActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.ArtificialPointsDialogActivity"
+            android:screenOrientation="landscape"
+            android:theme="@style/DialogTransparent" />
+        <activity
+            android:name=".activity.ArtificialPointsProDialogActivity"
+            android:screenOrientation="landscape"
+            android:theme="@style/DialogTransparent" />
+        <activity
+            android:name=".activity.ArtificialPointsCodeDialogActivity"
+            android:screenOrientation="landscape"
+            android:theme="@style/DialogTransparent" />
+        <activity
+            android:name=".activity.TestDrivesActivity"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/device_filter" />
+        </activity>
+        <activity
+            android:name=".activity.TestSigActivity"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/filter" />
+        </activity>
+        <activity android:name=".activity.CarDataActivity" />
+
+        <service android:name=".service.ZKCardReaderService" />
+        <service android:name=".service.SerialPortService" />
+
+        <receiver android:name=".receiver.StartUpReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>

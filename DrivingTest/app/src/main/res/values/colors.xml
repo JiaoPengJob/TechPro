@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="greay">#FFFFFF</color>
+    <color name="greny_cc">#CCCCCC</color>
+    <color name="blue">#5cc9fa</color>
+    <color name="content">#4A4A4A</color>
+    <color name="red_exam">#FF3333</color>
+    <color name="red_fail">#FB2D2D</color>
+    <color name="dialog_background">#ECECEC</color>
+    <color name="fontColor">#9B9B9B</color>
+
+</resources>
