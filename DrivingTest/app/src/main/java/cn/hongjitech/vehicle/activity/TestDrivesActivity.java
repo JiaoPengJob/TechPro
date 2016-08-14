@@ -30,10 +30,12 @@ import java.util.concurrent.Executors;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import cn.hongjitech.vehicle.R;
+import cn.hongjitech.vehicle.bean.MarkingBean;
 import cn.hongjitech.vehicle.map.TcpMessage;
 import cn.hongjitech.vehicle.map.TcpPresenter;
 import cn.hongjitech.vehicle.map.tcpConnectState;
 import cn.hongjitech.vehicle.service.SerialPortService;
+import cn.hongjitech.vehicle.util.ExamDataUtil;
 import cn.hongjitech.vehicle.util.ParsetoXWCJ;
 import cn.hongjitech.vehicle.util.SerialPortSendUtil;
 import cn.hongjitech.vehicle.util.SharedPrefsUtils;
@@ -158,6 +160,21 @@ public class TestDrivesActivity extends BaseActivity {
     ImageView min;//地图的缩小
     @InjectView(R.id.rpm)
     TextView rpm;
+
+    @InjectView(R.id.tvPro)
+    TextView tvPro;
+
+    @InjectView(R.id.tvFuc)
+    TextView tvFuc;
+
+    @InjectView(R.id.tvCon)
+    TextView tvCon;
+
+    @InjectView(R.id.tvLa)
+    TextView tvLa;
+
+    @InjectView(R.id.tvLo)
+    TextView tvLo;
     /*-----------------------------------------*/
     private Intent intent;//跳转
     private AlertDialog alertDialog;//弹出框输入口令
@@ -182,6 +199,11 @@ public class TestDrivesActivity extends BaseActivity {
     private int seatTag = 0;//纪录座椅是否调整过
     private int centralTag = 0;//纪录中央后视镜是否调整过
     private int leftTag = 0;//纪录左后视镜是否调整过
+    private MarkingBean markingBean;//扣分信息
+    private ExamDataUtil examDataUtil;//处理练一练数据工具类
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -623,7 +645,7 @@ public class TestDrivesActivity extends BaseActivity {
             String result = msg.obj.toString();
             getXWYD2(result);
             getEXAM(result);
-//            getGPHPD(result);
+            getGPHPD(result);
 //            getXWYD1(result);
 //            getXWCJ(result);
             return false;
@@ -639,13 +661,46 @@ public class TestDrivesActivity extends BaseActivity {
         if (!TextUtils.isEmpty(strMsg) && strMsg.length() > 7) {
             String str = strMsg.substring(0, 6);
             if (str.equals("$EXAM")) {
-                Log.d("TAG", strMsg);
-                resultStr = strMsg;
+                markingBean = examDataUtil.getExamData(strMsg);
+                if (markingBean != null) {
+                    if(markingBean.getMarkProject() != null){
+                        tvPro.setText("PRO--"+markingBean.getMarkProject());
+                    }
+                    if(markingBean.getMarkFraction() != null){
+                        tvFuc.setText("fAC"+markingBean.getMarkFraction());
+                    }
+                    if(markingBean.getMarkRes() != null){
+                        tvCon.setText("RES"+markingBean.getMarkRes());
+                    }
+                } else {
+                    Log.e("TAG", "扣分对象为空!");
+                }
             } else {
                 resultStr = null;
             }
         } else {
 
+        }
+    }
+
+    /**
+     * 获取GPS点
+     *
+     * @param strMsg
+     */
+    private void getGPHPD(String strMsg) {
+        if (!TextUtils.isEmpty(strMsg) && strMsg.length() > 7) {
+            String str = strMsg.substring(0, 6);
+            if (str.equals("$GPHPD")) {
+                String latitude = strMsg.substring(strMsg.indexOf(",", 6) + 1, strMsg.indexOf(",", 7));
+                String longitude = strMsg.substring(strMsg.indexOf(",", 7) + 1, strMsg.indexOf(",", 8));
+                tvLa.setText("La--"+latitude);
+                tvLo.setText("Lo--"+longitude);
+            } else {
+                Log.e("TAG", "GPS为空!");
+            }
+        } else {
+            Log.e("TAG", "GPS为空!");
         }
     }
 
@@ -673,7 +728,6 @@ public class TestDrivesActivity extends BaseActivity {
                     zfloat = Float.parseFloat(zString);
                     updateMap();
                 }
-
             }
         }
     }
@@ -717,7 +771,5 @@ public class TestDrivesActivity extends BaseActivity {
                 my_view.invalidate();
                 break;
         }
-
     }
-
 }

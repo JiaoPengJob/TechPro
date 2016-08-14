@@ -306,6 +306,7 @@ public class ExamProcessActivity extends BaseActivity {
 //        for (int i = 0; i < 2; i++) {
 //            list.add(new MarkingBean("起步", "2", "操作不当发动机熄火" + i));
 //        }
+
         //添加适配器
         markingAdapter = new MarkingAdapter(ExamProcessActivity.this, list);
         lv_exam_mark_info.setAdapter(markingAdapter);
@@ -757,6 +758,21 @@ public class ExamProcessActivity extends BaseActivity {
                             } else {
                                 index++;
                                 if (index == 1) {
+                                    if (!activityType.equals("trainTest")) {
+                                        fraction = 100;
+                                        list.add(new MarkingBean("上车准备", "100", "准备不充分!"));
+                                        markingAdapter.notifyDataSetChanged();
+                                        tv_exam_stu_passNum.setText(String.valueOf(list.size()));
+                                        lv_exam_mark_info.setSelection(markingAdapter.getCount());
+                                        showDialogForPass();
+                                        exitThread();
+                                    }
+                                }
+                            }
+                        } else {
+                            index++;
+                            if (index == 1) {
+                                if (!activityType.equals("trainTest")) {
                                     fraction = 100;
                                     list.add(new MarkingBean("上车准备", "100", "准备不充分!"));
                                     markingAdapter.notifyDataSetChanged();
@@ -765,17 +781,6 @@ public class ExamProcessActivity extends BaseActivity {
                                     showDialogForPass();
                                     exitThread();
                                 }
-                            }
-                        } else {
-                            index++;
-                            if (index == 1) {
-                                fraction = 100;
-                                list.add(new MarkingBean("上车准备", "100", "准备不充分!"));
-                                markingAdapter.notifyDataSetChanged();
-                                tv_exam_stu_passNum.setText(String.valueOf(list.size()));
-                                lv_exam_mark_info.setSelection(markingAdapter.getCount());
-                                showDialogForPass();
-                                exitThread();
                             }
                         }
                     } else {
@@ -1246,7 +1251,5 @@ public class ExamProcessActivity extends BaseActivity {
             tv_exam_stu_passNum.setText(String.valueOf(list.size()));
             lv_exam_mark_info.setSelection(markingAdapter.getCount());
         }
-
-
     }
 }
