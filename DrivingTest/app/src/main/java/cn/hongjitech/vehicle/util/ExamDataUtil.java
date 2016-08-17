@@ -22,8 +22,8 @@ public class ExamDataUtil {
     public MarkingBean getExamData(String strMsg) {
 //        String strMsg = SharedPrefsUtils.getValue(context, "strMsg", "");
         if (!strMsg.equals("")) {
-            String msg = strMsg.substring(strMsg.indexOf(",", 1) + 1, strMsg.indexOf(",", 6));
-            switch (msg) {
+//            String msg = strMsg.substring(strMsg.indexOf(",", 1) + 1, strMsg.indexOf(",", 6));
+            switch (strMsg) {
                 /*-------------------通用-----------------------*/
                 case "qibushichelianghouliujulixiaoyu30limikou10fen":
                     return new MarkingBean("", "10", "起步时后溜小于30公分");

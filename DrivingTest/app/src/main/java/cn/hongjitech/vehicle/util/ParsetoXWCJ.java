@@ -55,7 +55,7 @@ public class ParsetoXWCJ {
         }
 
         //车门
-        if (SharedPrefsUtils.getValue(context, "bf_door", "").equals("FA")) {
+        if (SharedPrefsUtils.getValue(context, "bf_door", "").equals("FB")) {
             menkong = "1";
         } else {
             menkong = "0";

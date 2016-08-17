@@ -2,6 +2,7 @@ package cn.hongjitech.vehicle.activity;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -213,7 +214,7 @@ public class TestDrivesActivity extends BaseActivity {
         ButterKnife.inject(TestDrivesActivity.this);
         ll_single_parent.setVisibility(View.GONE);
         initListener();
-        EventBus.getDefault().register(this);
+        EventBus.getDefault().register(TestDrivesActivity.this);
         serialPortThread = new SerialPortThread();
 
         try {
@@ -435,9 +436,9 @@ public class TestDrivesActivity extends BaseActivity {
                     //超声波距离信息2
                     tv_ultrasonic_two.setText(SharedPrefsUtils.getValue(TestDrivesActivity.this, "bf_ultrasonic_2", ""));
 
-                    if (tag == 1) {
+//                    if (tag == 1) {
                         parsetoXWCJ.getXWCJ();
-                    }
+//                    }
 //                    Log.d("TAG","点火---"+SharedPrefsUtils.getValue(TestDrivesActivity.this, "bf_engine_status", "")+"");
                     //判断是否在点火前
                     if (SharedPrefsUtils.getValue(TestDrivesActivity.this, "bf_engine_status", "").equals("02")) {
@@ -591,7 +592,6 @@ public class TestDrivesActivity extends BaseActivity {
                 my_view.invalidate();
             }
         }, 300);
-
     }
 
     private void initTcp() {
@@ -642,6 +642,7 @@ public class TestDrivesActivity extends BaseActivity {
     Handler handelr = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
+            Log.d("Tag","Handler进入");
             String result = msg.obj.toString();
             getXWYD2(result);
             getEXAM(result);
@@ -737,14 +738,7 @@ public class TestDrivesActivity extends BaseActivity {
         my_view.invalidate();
     }
 
-    @Override
-    protected void onDestroy() {
-        // TODO Auto-generated method stub
-        super.onDestroy();
-    }
-
     private void changeSize(int number) {
-
         switch (number) {
             case 1:
                 my_view.SetZoomSize(0.1f);

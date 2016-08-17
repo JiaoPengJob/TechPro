@@ -22,6 +22,7 @@ import com.example.lkmap.DrawView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -58,7 +59,7 @@ import cn.hongjitech.vehicle.util.StringUtils;
 
 /**
  * 开始进行考核,考试等流程
- * <p/>
+ * <p>
  * 当进行车辆操作时判断,分两种情况,一种是考试或考核,扣分大于二十则直接结束
  * 训练,一直到手动点击结束为止
  */
@@ -213,17 +214,18 @@ public class ExamProcessActivity extends BaseActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_exam_process);
         ButterKnife.inject(ExamProcessActivity.this);
+        EventBus.getDefault().register(this);
         initListener();
         ll_single_parent.setVisibility(View.GONE);//隐藏信号的布局
 
         //判断传过来的参数是否为空
-        if (getIntent().getStringExtra("activity") != null && getIntent().getSerializableExtra("user") != null && getIntent().getStringExtra("endTime") != null) {
-            activityType = getIntent().getStringExtra("activity");
-            endTime_random = getIntent().getStringExtra("endTime");
-            user = (User) getIntent().getSerializableExtra("user");
-            startTime_random = StringUtils.getCurrentTime("HH:mm:ss");
+//        if (getIntent().getStringExtra("activity") != null && getIntent().getSerializableExtra("user") != null && getIntent().getStringExtra("endTime") != null) {
+//            activityType = getIntent().getStringExtra("activity");
+//            endTime_random = getIntent().getStringExtra("endTime");
+//            user = (User) getIntent().getSerializableExtra("user");
+//            startTime_random = StringUtils.getCurrentTime("HH:mm:ss");
             initUserData();
-        }
+//        }
     }
 
     /**
@@ -269,11 +271,12 @@ public class ExamProcessActivity extends BaseActivity {
         timeFlag = true;
         serialPortThreadFlag = true;
         intMap();
+        initTcp();
         examDataUtil = new ExamDataUtil(ExamProcessActivity.this);
         gson = new GsonBuilder().enableComplexMapKeySerialization().create();
-        tv_exam_stu_name.setText(user.getUser_truename());
-        tv_exam_stu_id.setText(user.getUser_id_card());
-        tv_exam_stu_startTime.setText(StringUtils.getCurrentTime("HH:mm:ss"));
+//        tv_exam_stu_name.setText(user.getUser_truename());
+//        tv_exam_stu_id.setText(user.getUser_id_card());
+//        tv_exam_stu_startTime.setText(StringUtils.getCurrentTime("HH:mm:ss"));
 
         startTime = System.currentTimeMillis();
         timeThread = new TimeThread();
@@ -729,9 +732,9 @@ public class ExamProcessActivity extends BaseActivity {
                     }
 
                     if (!SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("")) {
-
+                        Log.e("TAG",SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", ""));
                         //判断是否在点火前
-                        if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("00")) {
+                        if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("02")) {
 
                             projectAdapter.setSelectedPosition(0);
                             projectAdapter.notifyDataSetChanged();
@@ -755,33 +758,35 @@ public class ExamProcessActivity extends BaseActivity {
                                     seatTag == 1 && centralTag == 1 && leftTag == 1) {
                                 startExamC = 1;
                                 parsetoXWCJ.getXWCJ();
+                                Log.e("","");
                             } else {
-                                index++;
-                                if (index == 1) {
-                                    if (!activityType.equals("trainTest")) {
-                                        fraction = 100;
-                                        list.add(new MarkingBean("上车准备", "100", "准备不充分!"));
-                                        markingAdapter.notifyDataSetChanged();
-                                        tv_exam_stu_passNum.setText(String.valueOf(list.size()));
-                                        lv_exam_mark_info.setSelection(markingAdapter.getCount());
-                                        showDialogForPass();
-                                        exitThread();
-                                    }
-                                }
+//                                Log.e("TAG","else1");
+//                                index++;
+//                                if (index == 1) {
+//                                    if (!activityType.equals("trainTest")) {
+//                                        fraction = 100;
+//                                        list.add(new MarkingBean("上车准备", "100", "准备不充分!"));
+//                                        markingAdapter.notifyDataSetChanged();
+//                                        tv_exam_stu_passNum.setText(String.valueOf(list.size()));
+//                                        lv_exam_mark_info.setSelection(markingAdapter.getCount());
+//                                        showDialogForPass();
+//                                        exitThread();
+//                                    }
+//                                }
                             }
                         } else {
-                            index++;
-                            if (index == 1) {
-                                if (!activityType.equals("trainTest")) {
-                                    fraction = 100;
-                                    list.add(new MarkingBean("上车准备", "100", "准备不充分!"));
-                                    markingAdapter.notifyDataSetChanged();
-                                    tv_exam_stu_passNum.setText(String.valueOf(list.size()));
-                                    lv_exam_mark_info.setSelection(markingAdapter.getCount());
-                                    showDialogForPass();
-                                    exitThread();
-                                }
-                            }
+//                            index++;
+//                            if (index == 1) {
+//                                if (!activityType.equals("trainTest")) {
+//                                    fraction = 100;
+//                                    list.add(new MarkingBean("上车准备", "100", "准备不充分!"));
+//                                    markingAdapter.notifyDataSetChanged();
+//                                    tv_exam_stu_passNum.setText(String.valueOf(list.size()));
+//                                    lv_exam_mark_info.setSelection(markingAdapter.getCount());
+//                                    showDialogForPass();
+//                                    exitThread();
+//                                }
+//                            }
                         }
                     } else {
                         Log.e(TAG, "点火状态为空!");
@@ -1122,13 +1127,83 @@ public class ExamProcessActivity extends BaseActivity {
         public boolean handleMessage(Message msg) {
             String result = msg.obj.toString();
             getXWYD2(result);
-            getEXAM(result);
+//            getEXAM(result);
+            parseMsg(result);
             getGPHPD(result);
 //            getXWYD1(result);
 //            getXWCJ(result);
             return false;
         }
     });
+
+    private String parseMsg(String strMsg) {
+        int lastFlag = strMsg.indexOf("*");
+        int a, b, c, d, e, f, g, h, nmin = -1;
+        int[] narr = new int[8];
+
+        int nWhileCount = 0;
+        while (lastFlag > -1) {
+            nWhileCount++;//防止死循环
+            if (nWhileCount > 1000) {
+                System.out.println("ParseMessage parseMsg 死循环退出!" + strMsg.replace("\n", ""));
+                strMsg = "";
+                break;
+            }
+            a = strMsg.indexOf("$EXAM");
+            b = strMsg.indexOf("$XWYD2");
+            c = strMsg.indexOf("$XWCJ");
+            d = strMsg.indexOf("$GPHPD");
+            e = strMsg.indexOf("$xwtcp");
+            f = strMsg.indexOf("$XWUDP,Load,Exam_");
+            g = strMsg.indexOf("$CMD");
+            h = strMsg.indexOf("$XWYD1");
+            narr[0] = a;
+            narr[1] = b;
+            narr[2] = c;
+            narr[3] = d;
+            narr[4] = e;
+            narr[5] = f;
+            narr[6] = g;
+            narr[7] = h;
+            nmin = -1;
+            for (int i = 0; i < narr.length; i++) {
+                if (nmin == -1) {
+                    nmin = narr[i];
+                }
+                if (narr[i] > -1 && nmin > narr[i]) {
+                    nmin = narr[i];
+                }
+            }
+
+            if (a > -1 && a == nmin && strMsg.indexOf("*FF", a) > -1) {
+                System.out.println("Exam_msg::" + strMsg.substring(a, strMsg.indexOf("*FF", a) + 3) + "\n");
+            }
+            if (nmin == -1 && lastFlag > 0) {
+                strMsg = new String(strMsg.substring(lastFlag + 1));
+            } else if (nmin == a) {
+                Log.e("Result",strMsg);
+//                strMsg = this.parseExamMessage(strMsg);
+            }
+//             else if (nmin == b) {
+//                strMsg = this.parseXWYD2Message(strMsg);
+//            } else if (nmin == c) {
+//                strMsg = this.parseXWCJMessage(strMsg);
+//            } else if (nmin == d) {
+//                strMsg = this.parseGPHPDMessage(strMsg);
+//            } else if (nmin == e) {
+//                strMsg = this.parseSetMessage(strMsg);
+//            } else if (nmin == f) {
+//                strMsg = this.parseExamModeMessage(strMsg);
+//            } else if (nmin == g) {
+//                strMsg = this.parseExamCmdMessage(strMsg);
+//            } else if (nmin == h) {
+//                strMsg = this.parseXWYD1Message(strMsg);
+//            }
+            lastFlag = strMsg.indexOf("*");
+        }
+        return strMsg;
+    }
+
 
     /**
      * 获取考试中扣分信号
@@ -1137,9 +1212,10 @@ public class ExamProcessActivity extends BaseActivity {
      */
     private void getEXAM(String strMsg) {
         if (!TextUtils.isEmpty(strMsg) && strMsg.length() > 7) {
-            String str = strMsg.substring(0, 6);
-            if (str.equals("$EXAM")) {
-                markingBean = examDataUtil.getExamData(strMsg);
+            if (strMsg.indexOf("$EXAM") > -1) {
+                String[] s = strMsg.split(",");
+                String exam = s[1];
+                markingBean = examDataUtil.getExamData(exam);
                 if (markingBean != null) {
                     initMarkData(markingBean);
                 } else {
@@ -1162,10 +1238,9 @@ public class ExamProcessActivity extends BaseActivity {
         if (!TextUtils.isEmpty(strMsg) && strMsg.length() > 7) {
             String str = strMsg.substring(0, 6);
             if (str.equals("$GPHPD")) {
-                String latitude = strMsg.substring(strMsg.indexOf(",", 6) + 1, strMsg.indexOf(",", 7));
-                String longitude = strMsg.substring(strMsg.indexOf(",", 7) + 1, strMsg.indexOf(",", 8));
-                Log.d(TAG, "latitude--" + latitude);
-                Log.e(TAG, "longitude--" + longitude);
+                String[] s = strMsg.split(",");
+                String latitude = s[6];
+                String longitude = s[7];
             } else {
                 Log.e(TAG, "GPS为空!");
             }

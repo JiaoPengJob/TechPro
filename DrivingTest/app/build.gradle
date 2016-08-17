@@ -55,4 +55,5 @@ dependencies {
     compile 'com.bugtags.library:bugtags-lib:latest.integration'
     compile files('src/libs/httpmime-4.2.5.jar')
     compile files('src/main/jniLibs/eventbus-3.0.0.jar')
+    compile files('src/main/jniLibs/lkmap.jar')
 }

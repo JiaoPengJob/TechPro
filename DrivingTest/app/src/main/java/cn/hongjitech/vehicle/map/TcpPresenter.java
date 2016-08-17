@@ -38,7 +38,7 @@ public class TcpPresenter {
     }
 
     /**
-     * 停止接收数据
+     * 接收数据
      */
     public void startReciveData() {
         if (_MyTCPClient != null) {
