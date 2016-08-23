@@ -2,6 +2,9 @@ package cn.hongjitech.vehicle.activity;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -27,6 +30,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +50,7 @@ import cn.hongjitech.vehicle.http.NetworkImgAsyncTask;
 import cn.hongjitech.vehicle.initTestData.ProjectTestData;
 import cn.hongjitech.vehicle.javaBean.InitializationRoot;
 import cn.hongjitech.vehicle.javaBean.User;
+import cn.hongjitech.vehicle.map.TCPClient;
 import cn.hongjitech.vehicle.map.TcpMessage;
 import cn.hongjitech.vehicle.map.TcpPresenter;
 import cn.hongjitech.vehicle.map.tcpConnectState;
@@ -56,10 +61,11 @@ import cn.hongjitech.vehicle.util.ParsetoXWCJ;
 import cn.hongjitech.vehicle.util.SerialPortSendUtil;
 import cn.hongjitech.vehicle.util.SharedPrefsUtils;
 import cn.hongjitech.vehicle.util.StringUtils;
+import okhttp3.internal.framed.Variant;
 
 /**
  * 开始进行考核,考试等流程
- * <p>
+ * <p/>
  * 当进行车辆操作时判断,分两种情况,一种是考试或考核,扣分大于二十则直接结束
  * 训练,一直到手动点击结束为止
  */
@@ -204,9 +210,12 @@ public class ExamProcessActivity extends BaseActivity {
     private int centralTag = 0;//纪录中央后视镜是否调整过
     private int leftTag = 0;//纪录左后视镜是否调整过
     private ExamDataUtil examDataUtil;//处理练一练数据工具类
-    private String proStr;//记录选中显示的项目名称
+    private String proStr = "倒车入库";//记录选中显示的项目名称
     private int goState = 0;//记录档位信息,判断是否显示起步状态
     private int index = 0;//线程进入的次数
+    private TcpPresenter tp = TcpPresenter.getInstance();
+    private TextView tv1, tv2;
+    MediaPlayer mp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -219,13 +228,16 @@ public class ExamProcessActivity extends BaseActivity {
         ll_single_parent.setVisibility(View.GONE);//隐藏信号的布局
 
         //判断传过来的参数是否为空
-//        if (getIntent().getStringExtra("activity") != null && getIntent().getSerializableExtra("user") != null && getIntent().getStringExtra("endTime") != null) {
-//            activityType = getIntent().getStringExtra("activity");
-//            endTime_random = getIntent().getStringExtra("endTime");
-//            user = (User) getIntent().getSerializableExtra("user");
-//            startTime_random = StringUtils.getCurrentTime("HH:mm:ss");
+        if (getIntent().getStringExtra("activity") != null && getIntent().getSerializableExtra("user") != null && getIntent().getStringExtra("endTime") != null) {
+            activityType = getIntent().getStringExtra("activity");
+            endTime_random = getIntent().getStringExtra("endTime");
+            user = (User) getIntent().getSerializableExtra("user");
+            startTime_random = StringUtils.getCurrentTime("HH:mm:ss");
             initUserData();
-//        }
+        }
+        //测试数据,现已隐藏
+        tv1 = (TextView) findViewById(R.id.tv1);
+        tv2 = (TextView) findViewById(R.id.tv2);
     }
 
     /**
@@ -270,13 +282,14 @@ public class ExamProcessActivity extends BaseActivity {
         goState = 0;
         timeFlag = true;
         serialPortThreadFlag = true;
+        mp = new MediaPlayer();
         intMap();
         initTcp();
         examDataUtil = new ExamDataUtil(ExamProcessActivity.this);
         gson = new GsonBuilder().enableComplexMapKeySerialization().create();
-//        tv_exam_stu_name.setText(user.getUser_truename());
-//        tv_exam_stu_id.setText(user.getUser_id_card());
-//        tv_exam_stu_startTime.setText(StringUtils.getCurrentTime("HH:mm:ss"));
+        tv_exam_stu_name.setText(user.getUser_truename());
+        tv_exam_stu_id.setText(user.getUser_id_card());
+        tv_exam_stu_startTime.setText(StringUtils.getCurrentTime("HH:mm:ss"));
 
         startTime = System.currentTimeMillis();
         timeThread = new TimeThread();
@@ -727,18 +740,18 @@ public class ExamProcessActivity extends BaseActivity {
                     //超声波距离信息2
                     tv_ultrasonic_two.setText(SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_ultrasonic_2", ""));
 
-                    if (startExamC == 1) {
-                        parsetoXWCJ.getXWCJ();
-                    }
+//                    if (startExamC == 1) {
+                    parsetoXWCJ.getXWCJ();
+//                    }
 
                     if (!SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("")) {
-                        Log.e("TAG",SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", ""));
+//                        Log.e("TAG",SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", ""));
                         //判断是否在点火前
                         if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("02")) {
 
-                            projectAdapter.setSelectedPosition(0);
-                            projectAdapter.notifyDataSetChanged();
-                            lv_exam_pro_info.setSelection(0);
+//                            projectAdapter.setSelectedPosition(0);
+//                            projectAdapter.notifyDataSetChanged();
+//                            lv_exam_pro_info.setSelection(0);
 
                             //判断是否在熄火状态下调整左后视镜
                             if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_left_rearview_mirror", "").equals("01")) {
@@ -758,21 +771,19 @@ public class ExamProcessActivity extends BaseActivity {
                                     seatTag == 1 && centralTag == 1 && leftTag == 1) {
                                 startExamC = 1;
                                 parsetoXWCJ.getXWCJ();
-                                Log.e("","");
                             } else {
-//                                Log.e("TAG","else1");
-//                                index++;
-//                                if (index == 1) {
-//                                    if (!activityType.equals("trainTest")) {
-//                                        fraction = 100;
-//                                        list.add(new MarkingBean("上车准备", "100", "准备不充分!"));
-//                                        markingAdapter.notifyDataSetChanged();
-//                                        tv_exam_stu_passNum.setText(String.valueOf(list.size()));
-//                                        lv_exam_mark_info.setSelection(markingAdapter.getCount());
-//                                        showDialogForPass();
-//                                        exitThread();
-//                                    }
-//                                }
+                                index++;
+                                if (index == 1) {
+                                    if (!activityType.equals("trainTest")) {
+                                        fraction = 100;
+                                        list.add(new MarkingBean("上车准备", "100", "准备不充分!", ""));
+                                        markingAdapter.notifyDataSetChanged();
+                                        tv_exam_stu_passNum.setText(String.valueOf(list.size()));
+                                        lv_exam_mark_info.setSelection(markingAdapter.getCount());
+                                        showDialogForPass();
+                                        exitThread();
+                                    }
+                                }
                             }
                         } else {
 //                            index++;
@@ -810,6 +821,8 @@ public class ExamProcessActivity extends BaseActivity {
         } catch (SecurityException s) {
             Log.e(TAG, s.toString());
         }
+        EventBus.getDefault().unregister(this);
+        TcpPresenter.getInstance().stopReciveData();
     }
 
     /**
@@ -1091,15 +1104,42 @@ public class ExamProcessActivity extends BaseActivity {
 
     private void initTcp() {
         TcpPresenter.getInstance().startReciveData();
+        sendMessageToCar();
     }
+
+//    /**
+//     * TcpMessage
+//     *
+//     * @param obj
+//     */
+//    @Subscribe(threadMode = ThreadMode.MAIN)
+//    public void onEventMainThread(TcpMessage obj) {
+//        Message message = new Message();
+//        message.what = 0;
+//        message.obj = obj.strMsg.toString();
+//        handelr.sendMessage(message);
+//    }
+//
+//    /**
+//     * TcpMessage
+//     *
+//     * @param obj
+//     */
+//    @Subscribe(threadMode = ThreadMode.MAIN)
+//    public void onEventMainThread(tcpConnectState obj) {
+//        Message message = new Message();
+//        message.what = 0;
+//        message.obj = obj.strMsg.toString();
+//        handelr.sendMessage(message);
+//    }
 
     /**
      * TcpMessage
      *
      * @param obj
      */
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEventMainThread(TcpMessage obj) {
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void onEventBackgroundThread(TcpMessage obj) {
         Message message = new Message();
         message.what = 0;
         message.obj = obj.strMsg.toString();
@@ -1111,8 +1151,8 @@ public class ExamProcessActivity extends BaseActivity {
      *
      * @param obj
      */
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEventMainThread(tcpConnectState obj) {
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void onEventBackgroundThread(tcpConnectState obj) {
         Message message = new Message();
         message.what = 0;
         message.obj = obj.strMsg.toString();
@@ -1126,84 +1166,52 @@ public class ExamProcessActivity extends BaseActivity {
         @Override
         public boolean handleMessage(Message msg) {
             String result = msg.obj.toString();
+            xwtcp(result);
+            res(result);
+            xwcj(result);
             getXWYD2(result);
-//            getEXAM(result);
-            parseMsg(result);
+            getEXAM(result);
             getGPHPD(result);
-//            getXWYD1(result);
-//            getXWCJ(result);
             return false;
         }
     });
 
-    private String parseMsg(String strMsg) {
-        int lastFlag = strMsg.indexOf("*");
-        int a, b, c, d, e, f, g, h, nmin = -1;
-        int[] narr = new int[8];
-
-        int nWhileCount = 0;
-        while (lastFlag > -1) {
-            nWhileCount++;//防止死循环
-            if (nWhileCount > 1000) {
-                System.out.println("ParseMessage parseMsg 死循环退出!" + strMsg.replace("\n", ""));
-                strMsg = "";
-                break;
+    private void res(String strMsg) {
+        if (!TextUtils.isEmpty(strMsg) && strMsg.length() > 7) {
+            if (strMsg.indexOf("$xwtcp,set,exam_startwork,ok*ff") > -1) {
+                String index = strMsg.substring(strMsg.indexOf("$xwtcp", 0), strMsg.indexOf("$xwtcp") + 20);
+//                tv1.setText(index);
             }
-            a = strMsg.indexOf("$EXAM");
-            b = strMsg.indexOf("$XWYD2");
-            c = strMsg.indexOf("$XWCJ");
-            d = strMsg.indexOf("$GPHPD");
-            e = strMsg.indexOf("$xwtcp");
-            f = strMsg.indexOf("$XWUDP,Load,Exam_");
-            g = strMsg.indexOf("$CMD");
-            h = strMsg.indexOf("$XWYD1");
-            narr[0] = a;
-            narr[1] = b;
-            narr[2] = c;
-            narr[3] = d;
-            narr[4] = e;
-            narr[5] = f;
-            narr[6] = g;
-            narr[7] = h;
-            nmin = -1;
-            for (int i = 0; i < narr.length; i++) {
-                if (nmin == -1) {
-                    nmin = narr[i];
-                }
-                if (narr[i] > -1 && nmin > narr[i]) {
-                    nmin = narr[i];
-                }
-            }
-
-            if (a > -1 && a == nmin && strMsg.indexOf("*FF", a) > -1) {
-                System.out.println("Exam_msg::" + strMsg.substring(a, strMsg.indexOf("*FF", a) + 3) + "\n");
-            }
-            if (nmin == -1 && lastFlag > 0) {
-                strMsg = new String(strMsg.substring(lastFlag + 1));
-            } else if (nmin == a) {
-                Log.e("Result",strMsg);
-//                strMsg = this.parseExamMessage(strMsg);
-            }
-//             else if (nmin == b) {
-//                strMsg = this.parseXWYD2Message(strMsg);
-//            } else if (nmin == c) {
-//                strMsg = this.parseXWCJMessage(strMsg);
-//            } else if (nmin == d) {
-//                strMsg = this.parseGPHPDMessage(strMsg);
-//            } else if (nmin == e) {
-//                strMsg = this.parseSetMessage(strMsg);
-//            } else if (nmin == f) {
-//                strMsg = this.parseExamModeMessage(strMsg);
-//            } else if (nmin == g) {
-//                strMsg = this.parseExamCmdMessage(strMsg);
-//            } else if (nmin == h) {
-//                strMsg = this.parseXWYD1Message(strMsg);
-//            }
-            lastFlag = strMsg.indexOf("*");
         }
-        return strMsg;
     }
 
+    private void xwtcp(String strMsg) {
+        if (!TextUtils.isEmpty(strMsg) && strMsg.length() > 7) {
+            if (strMsg.indexOf("$xwtcp,set,ok*ff") > -1) {
+                String index = strMsg.substring(strMsg.indexOf("$xwtcp"), strMsg.indexOf("$xwtcp") + 16);
+                if (index.equals("$xwtcp,set,ok*ff")) {
+                    tp.sendMsgToTcp("$xwtcp,set,exam_startwork*ff");
+                }
+            }
+        }
+    }
+
+    /**
+     * 发送开始信号给练一练
+     */
+    private void sendMessageToCar() {
+//        boolean bo = tp.sendMsgToTcp("$xwtcp,set,exam_mode_training*ff");
+        tp.sendMsgToTcp("$xwtcp,set,exam_startwork*ff");
+    }
+
+    private void xwcj(String strMsg) {
+        if (!TextUtils.isEmpty(strMsg) && strMsg.length() > 7) {
+            if (strMsg.indexOf("$XWCJ") > -1) {
+                tv1.setText(strMsg);
+                Log.e(TAG, strMsg);
+            }
+        }
+    }
 
     /**
      * 获取考试中扣分信号
@@ -1213,19 +1221,29 @@ public class ExamProcessActivity extends BaseActivity {
     private void getEXAM(String strMsg) {
         if (!TextUtils.isEmpty(strMsg) && strMsg.length() > 7) {
             if (strMsg.indexOf("$EXAM") > -1) {
-                String[] s = strMsg.split(",");
-                String exam = s[1];
-                markingBean = examDataUtil.getExamData(exam);
-                if (markingBean != null) {
-                    initMarkData(markingBean);
-                } else {
-                    Log.e(TAG, "扣分对象为空!");
+                try {
+                    String str = strMsg.substring(strMsg.indexOf("$EXAM"));
+                    String index1 = str.substring(str.indexOf("$EXAM"), str.indexOf("*FF"));
+                    String index2 = str.substring(str.lastIndexOf("$EXAM"), str.lastIndexOf("*FF"));
+                    String[] s = index1.split(",");
+//                    tv1.setText(index1 + "");
+                    String exam = s[1];
+                    if (!exam.equals("bencixunliankaishi")) {
+                        playMedia(exam);
+                    }
+                    markingBean = examDataUtil.getExamData(exam);
+                    if (markingBean != null) {
+                        initMarkData(markingBean);
+                    } else {
+                        Log.e(TAG, "扣分对象为空!");
+                    }
+                } catch (StringIndexOutOfBoundsException s) {
+                    Log.e(TAG, s.toString());
+                } catch (Exception e) {
+                    Log.e(TAG, e.toString());
                 }
-            } else {
-                Log.e(TAG, "接收扣分信息为空!");
+
             }
-        } else {
-            Log.e(TAG, "接收扣分信息失败!");
         }
     }
 
@@ -1241,11 +1259,7 @@ public class ExamProcessActivity extends BaseActivity {
                 String[] s = strMsg.split(",");
                 String latitude = s[6];
                 String longitude = s[7];
-            } else {
-                Log.e(TAG, "GPS为空!");
             }
-        } else {
-            Log.e(TAG, "GPS为空!");
         }
     }
 
@@ -1297,7 +1311,8 @@ public class ExamProcessActivity extends BaseActivity {
      */
     private void initMarkData(MarkingBean markingBean) {
         //如果是开始信号,使项目列表更新
-        if (markingBean.getMarkRes().equals("开始")) {
+        if (!markingBean.getMarkProject().equals("") && markingBean.getMarkRes().equals("开始") && markingBean.getMarkFraction().equals("0")) {
+            playMedia(markingBean.getMedia());
             for (int i = 0; i < projectAdapter.getCount(); i++) {
                 if (projectAdapter.getItem(i).equals(markingBean.getMarkProject())) {
                     goState = 1;
@@ -1310,21 +1325,43 @@ public class ExamProcessActivity extends BaseActivity {
             }
         }
         //通用扣分规则,先添加对应项目名称,更新扣分列表
-        if (markingBean.getMarkProject().equals("")) {
+        if (markingBean.getMarkProject().equals("") && !markingBean.getMarkFraction().equals("") && !markingBean.getMarkRes().equals("")) {
             if (proStr != null) {
+                playMedia(markingBean.getMedia());
                 markingBean.setMarkProject(proStr);
                 list.add(markingBean);
                 markingAdapter.notifyDataSetChanged();
                 tv_exam_stu_passNum.setText(String.valueOf(list.size()));
                 lv_exam_mark_info.setSelection(markingAdapter.getCount());
+                judgmentFraction();
             }
-        }
-        //如果返回的对象全都有值,则直接显示到列表中
-        if (!markingBean.getMarkProject().equals("") && !markingBean.getMarkFraction().equals("") && !markingBean.getMarkRes().equals("")) {
+        }//如果返回的对象全都有值,则直接显示到列表中
+        else if (!markingBean.getMarkProject().equals("") && !markingBean.getMarkFraction().equals("") && !markingBean.getMarkRes().equals("") && !markingBean.getMarkRes().equals("开始")) {
+            playMedia(markingBean.getMedia());
             list.add(markingBean);
             markingAdapter.notifyDataSetChanged();
             tv_exam_stu_passNum.setText(String.valueOf(list.size()));
             lv_exam_mark_info.setSelection(markingAdapter.getCount());
+            judgmentFraction();
+        }
+    }
+
+    public void playMedia(String name) {
+        try {
+            AssetFileDescriptor fileDescriptor = getResources().getAssets().openFd(name + ".wav");
+            mp.setDataSource(fileDescriptor.getFileDescriptor(), fileDescriptor.getStartOffset(), fileDescriptor.getLength());
+            mp.prepare();
+            mp.start();
+            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    mp.reset();
+                }
+            });
+        } catch (IOException io) {
+            Log.e("Error", io.toString());
+        } catch (Exception e) {
+            Log.e("Error", e.toString());
         }
     }
 }

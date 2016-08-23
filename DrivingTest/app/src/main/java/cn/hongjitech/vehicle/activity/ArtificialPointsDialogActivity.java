@@ -113,7 +113,7 @@ public class ArtificialPointsDialogActivity extends BaseActivity {
                     ArtificialPointsDialogActivity.this.overridePendingTransition(R.anim.dialogactivity_artpoi, R.anim.dialogactivity_artpoi_exit);
                     break;
                 case R.id.iv_dialog_artPoi_sure://确定
-                    MarkingBean markingBean = new MarkingBean(proString, fraction, codeString);
+                    MarkingBean markingBean = new MarkingBean(proString, fraction, codeString,null);
                     intent = new Intent(ArtificialPointsDialogActivity.this, ExamProcessActivity.class);
                     if (markingBean.getMarkProject() != null && markingBean.getMarkFraction() != null && markingBean.getMarkRes() != null) {
                         intent.putExtra("markingBean", markingBean);

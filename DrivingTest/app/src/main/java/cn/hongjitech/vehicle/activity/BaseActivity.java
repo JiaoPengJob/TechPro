@@ -33,7 +33,6 @@ public class BaseActivity extends Activity {
         params.systemUiVisibility = View.SYSTEM_UI_FLAG_LOW_PROFILE;
         window.setAttributes(params);
         registerExitReceiver();
-
     }
 
     private void registerExitReceiver() {

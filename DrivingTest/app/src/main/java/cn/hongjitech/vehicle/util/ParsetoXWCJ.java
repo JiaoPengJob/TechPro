@@ -3,6 +3,8 @@ package cn.hongjitech.vehicle.util;
 import android.content.Context;
 import android.util.Log;
 
+import cn.hongjitech.vehicle.map.TCPClient;
+
 /**
  * 发送车身信号数据到练一练
  */
@@ -134,8 +136,9 @@ public class ParsetoXWCJ {
                 .append(yuanguang + ",")
                 .append(jinguang + ",")
                 .append(wudeng + "*FF");
-        Log.d("ParsetoXWCJ", sb.toString());
+//        Log.d("ParsetoXWCJ", sb.toString());
         xgydSerialPortSendUtil.sendMessage(sb.toString().getBytes());
+//        new TCPClient().sendMessage(sb.toString());
         return null;
     }
 

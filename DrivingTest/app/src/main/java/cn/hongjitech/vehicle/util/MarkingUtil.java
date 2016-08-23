@@ -34,11 +34,11 @@ public class MarkingUtil {
      */
     public MarkingBean cunnectFuction(final Context context) {
         if (SharedPrefsUtils.getValue(context, "bf_belt_info", "").equals("00")) {
-            return new MarkingBean("不合格情形", "100", "不按规定使用安全带或者戴安全头盔");
+            return new MarkingBean("不合格情形", "100", "不按规定使用安全带或者戴安全头盔",null);
         }
 
         if (SharedPrefsUtils.getValue(context, "bf_engine_status", "").equals("00")) {
-            return new MarkingBean("不合格情形", "10", "因操作不当造成发动机熄火一次");
+            return new MarkingBean("不合格情形", "10", "因操作不当造成发动机熄火一次",null);
         }
 
         if (SharedPrefsUtils.getValue(context, "bf_speed", "").equals("0")) {
@@ -49,7 +49,7 @@ public class MarkingUtil {
                     if (SharedPrefsUtils.getValue(context, "bf_speed", "").equals("0")) {
                         switch (proType) {
                             case "倒车入库":
-                                markingBean = new MarkingBean("倒车入库", "100", "中途停车");
+                                markingBean = new MarkingBean("倒车入库", "100", "中途停车",null);
                                 break;
 
                         }

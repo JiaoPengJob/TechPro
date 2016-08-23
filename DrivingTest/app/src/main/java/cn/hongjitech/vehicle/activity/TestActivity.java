@@ -49,7 +49,7 @@ public class TestActivity extends BaseActivity {
 
         markingBeens = new ArrayList<MarkingBean>();
         for (int i = 0; i < 3; i++) {
-            markingBeens.add(new MarkingBean("起步" + i, "1" + i, "操作不当发动机熄火" + i));
+            markingBeens.add(new MarkingBean("起步" + i, "1" + i, "操作不当发动机熄火" + i,null));
         }
         lv_test_info.setAdapter(new MarkingAdapter(TestActivity.this, markingBeens));
 

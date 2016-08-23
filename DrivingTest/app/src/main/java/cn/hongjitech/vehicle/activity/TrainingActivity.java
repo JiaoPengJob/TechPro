@@ -518,7 +518,11 @@ public class TrainingActivity extends BaseActivity {
      */
     private void stopService() {
         if (serviceConnection != null) {
-            unbindService(serviceConnection);
+            try {
+                unbindService(serviceConnection);
+            }catch (IllegalArgumentException i){
+                Log.e("Training",i.toString());
+            }
         }
     }
 

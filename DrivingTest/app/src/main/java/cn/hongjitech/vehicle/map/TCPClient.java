@@ -17,13 +17,14 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 /**
- * Created by Administrator on 15-9-18.
+ *
  */
 public class TCPClient implements Runnable {
-    //    public String SERVER_IP = "10.10.100.254";//192.168.41.254
-    public String SERVER_IP = "192.168.41.254";
+    //        public String SERVER_IP = "10.10.100.254";//192.168.41.254
+//    public String SERVER_IP = "192.168.41.254";
+    public String SERVER_IP = "192.168.137.199";
     private String SERVER_Name = "车载终端设备";
-    public int SERVERPORT = 8899;
+    public int SERVERPORT = 8889;//有线,无线WiFi是8899
     Socket socket;
     public Handler mHandler;
     BufferedReader input;
@@ -70,13 +71,17 @@ public class TCPClient implements Runnable {
             }
 //            getTCPIP();
             if (SERVER_IP == "") {
-                SERVER_IP = "10.10.100.254";
+//                SERVER_IP = "192.168.41.254";
+//                SERVER_IP = "10.10.100.254";
+                SERVER_IP = "192.168.137.199";
+//                SERVER_IP = "192.168.137.199";
             }
             serverAddr = InetAddress.getByName(SERVER_IP);
             socket = new Socket(serverAddr, SERVERPORT);
-//            socket.setSoTimeout(300);
+            socket.setSoTimeout(300);
             input = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
             bConnect = true;
+//            sendMessage("$xwtcp,set,exam_mode_training*ff");
         } catch (UnknownHostException e1) {
             bConnect = false;
             e1.printStackTrace();
@@ -99,6 +104,7 @@ public class TCPClient implements Runnable {
             out.write(strMsg.getBytes());
             out.flush();
             bresult = true;
+//            Log.d("TAG","成功发送开始命令");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -108,7 +114,7 @@ public class TCPClient implements Runnable {
     //连接次数
     private int nConnectCount = -1;
     //间隔
-    private int ndur = 5;
+    private int ndur = 2;
 
     public void run() {
         int n = 0;
@@ -118,27 +124,27 @@ public class TCPClient implements Runnable {
                 //自动连接
                 if (bConnect == false) {
                     iniTCPClient();
+//                    sendMessage("$xwtcp,set,exam_mode_training*ff");
                     nConnectCount++;
                 }
                 n = 0;
                 //接受数据
                 if (bConnect) {
                     nConnectCount = -1;
-                    while (n < 5 && bConnect) {
+                    while (n < 1 && bConnect) {
                         readDatabyTCP();
                         n++;
                     }
                     //间隔1分钟检测服务器发送数据情况
-                    if (nCount > 1 * 60 * 1000 / ndur && sendMessage("train") == false) {
+                    if (nCount > 60 * 1000 / ndur && sendMessage("train") == false) {
                         nCount = 0;
                         bConnect = false;
                     }
                 }
-
                 nCount++;
             }
             try {
-                Thread.currentThread().sleep(ndur);
+                Thread.currentThread().sleep(300);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -201,7 +207,7 @@ public class TCPClient implements Runnable {
         TcpMessage msg = new TcpMessage();
         msg.nType = nType;
         msg.strMsg = strMsg;
-        System.out.println("postMsgToEventBus" + strMsg);
+//        System.out.println("postMsgToEventBus" + strMsg);
         EventBus.getDefault().post(msg);
     }
 
@@ -209,7 +215,7 @@ public class TCPClient implements Runnable {
         tcpConnectState msg = new tcpConnectState();
         msg.nType = nType;
         msg.strMsg = strMsg;
-        System.out.println("postTcpStateToEventBus" + strMsg);
+//        System.out.println("postTcpStateToEventBus" + strMsg);
         EventBus.getDefault().post(msg);
     }
 

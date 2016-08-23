@@ -693,10 +693,10 @@ public class TestDrivesActivity extends BaseActivity {
         if (!TextUtils.isEmpty(strMsg) && strMsg.length() > 7) {
             String str = strMsg.substring(0, 6);
             if (str.equals("$GPHPD")) {
-                String latitude = strMsg.substring(strMsg.indexOf(",", 6) + 1, strMsg.indexOf(",", 7));
-                String longitude = strMsg.substring(strMsg.indexOf(",", 7) + 1, strMsg.indexOf(",", 8));
-                tvLa.setText("La--"+latitude);
-                tvLo.setText("Lo--"+longitude);
+//                String latitude = strMsg.substring(strMsg.indexOf(",", 6) + 1, strMsg.indexOf(",", 7));
+//                String longitude = strMsg.substring(strMsg.indexOf(",", 7) + 1, strMsg.indexOf(",", 8));
+//                tvLa.setText("La--"+latitude);
+//                tvLo.setText("Lo--"+longitude);
             } else {
                 Log.e("TAG", "GPS为空!");
             }
