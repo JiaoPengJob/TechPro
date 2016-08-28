@@ -10,6 +10,11 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
+    <uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
 
     <application
         android:name=".volleyHttp.App"
@@ -29,7 +34,15 @@
         </activity>
         <activity
             android:name=".activity.TrainingActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/filter" />
+        </activity>
         <activity
             android:name=".activity.ExamProcessActivity"
             android:screenOrientation="landscape" />
@@ -59,26 +72,10 @@
             android:theme="@style/DialogTransparent" />
         <activity
             android:name=".activity.TestDrivesActivity"
-            android:screenOrientation="landscape">
-            <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                android:resource="@xml/device_filter" />
-        </activity>
+            android:screenOrientation="landscape"></activity>
         <activity
             android:name=".activity.TestSigActivity"
-            android:screenOrientation="landscape">
-            <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                android:resource="@xml/filter" />
-        </activity>
+            android:screenOrientation="landscape"></activity>
         <activity android:name=".activity.CarDataActivity" />
 
         <service android:name=".service.ZKCardReaderService" />

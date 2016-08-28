@@ -10,16 +10,18 @@ public class MarkingBean implements Serializable {
     private String markProject;//扣分项目
     private String markFraction;//扣分
     private String markRes;//扣分原因
-    private String media;
+    private String media;//语音文件名
+    private String code;//扣分代码
 
     public MarkingBean() {
     }
 
-    public MarkingBean(String markProject, String markFraction, String markRes,String media) {
+    public MarkingBean(String markProject, String markFraction, String markRes, String media, String code) {
         this.markProject = markProject;
         this.markFraction = markFraction;
         this.markRes = markRes;
         this.media = media;
+        this.code = code;
     }
 
     public String getMarkProject() {
@@ -52,5 +54,13 @@ public class MarkingBean implements Serializable {
 
     public void setMedia(String media) {
         this.media = media;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }

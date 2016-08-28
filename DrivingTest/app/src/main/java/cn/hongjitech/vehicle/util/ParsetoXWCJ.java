@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import cn.hongjitech.vehicle.map.TCPClient;
+import cn.hongjitech.vehicle.map.TcpPresenter;
 
 /**
  * 发送车身信号数据到练一练
@@ -14,19 +15,29 @@ public class ParsetoXWCJ {
 
     Context context;
     XGYDSerialPortSendUtil xgydSerialPortSendUtil;
+//    private TcpPresenter tp = TcpPresenter.getInstance();
+
+    String anquandai, menkong, mingdi, yushua, dangweiD1 = "0", dangweiD2 = "0", dangweiD3 = "0",
+            dangweiD4 = "0", dangwei, beiyong1 = "0", beiyong2 = "0", beiyong3 = "0", beiyong4 = "0", beiyong5 = "0",
+            dianhuo, zuozhuandeng, youzhuandeng, jiaosha, xiaodeng, yuanguang, jinguang, wudeng;
 
     public ParsetoXWCJ(Context context) {
         this.context = context;
-        xgydSerialPortSendUtil = new XGYDSerialPortSendUtil();
+//        xgydSerialPortSendUtil = new XGYDSerialPortSendUtil();
     }
 
     public String getXWCJ() {
         String xwcj = "";
-        String anquandai, menkong, mingdi, yushua, dangweiD1 = "0", dangweiD2 = "0", dangweiD3 = "0",
-                dangweiD4 = "0", dangwei, beiyong1 = "0", beiyong2 = "0", beiyong3 = "0", beiyong4 = "0", beiyong5 = "0",
-                dianhuo, zuozhuandeng, youzhuandeng, jiaosha, xiaodeng, yuanguang, jinguang, wudeng;
 
-        dangwei = SharedPrefsUtils.getValue(context, "bf_gear_info", "0");
+//        dangwei = SharedPrefsUtils.getValue(context, "bf_gear_info", "0");
+        //档位
+        if (SharedPrefsUtils.getValue(context, "bf_gear_info", "0").equals("0")) {
+            dangwei = "0";
+        } else if (SharedPrefsUtils.getValue(context, "bf_gear_info", "0").equals("7")) {
+            dangwei = "6";
+        } else {
+            dangwei = SharedPrefsUtils.getValue(context, "bf_gear_info", "0");
+        }
 
         //雨刷
         if (SharedPrefsUtils.getValue(context, "bf_wiper", "").equals("87")) {
@@ -58,9 +69,9 @@ public class ParsetoXWCJ {
 
         //车门
         if (SharedPrefsUtils.getValue(context, "bf_door", "").equals("FB")) {
-            menkong = "1";
-        } else {
             menkong = "0";
+        } else {
+            menkong = "1";
         }
 
         //安全带
@@ -136,10 +147,35 @@ public class ParsetoXWCJ {
                 .append(yuanguang + ",")
                 .append(jinguang + ",")
                 .append(wudeng + "*FF");
-//        Log.d("ParsetoXWCJ", sb.toString());
-        xgydSerialPortSendUtil.sendMessage(sb.toString().getBytes());
-//        new TCPClient().sendMessage(sb.toString());
+//                .append(wudeng + "*" + getCode(sb.toString()));
+
+//        Log.e("TAGUU", sb.toString());
+        xgydSerialPortSendUtil = new XGYDSerialPortSendUtil();
+        if (sb != null) {
+//            tp.sendMsgToTcp(sb.toString());
+            xgydSerialPortSendUtil.sendMessage(sb.toString().getBytes());
+        }
         return null;
     }
 
+    /**
+     * 校验
+     *
+     * @param str
+     * @return
+     */
+    private String getCode(String str) {
+        int result = 0;
+        String[] s = str.split(",");
+        for (int i = 1; i < 22; i++) {
+            result ^= Integer.parseInt(s[i]);
+        }
+        result = result ^ Integer.parseInt(wudeng);
+
+        String res = String.valueOf(result);
+        if (res.length() == 1) {
+            res = "0" + res;
+        }
+        return res;
+    }
 }

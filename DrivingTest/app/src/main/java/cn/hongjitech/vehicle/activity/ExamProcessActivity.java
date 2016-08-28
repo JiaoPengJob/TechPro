@@ -48,6 +48,8 @@ import cn.hongjitech.vehicle.bean.UserInfo;
 import cn.hongjitech.vehicle.http.NetworkAsyncTask;
 import cn.hongjitech.vehicle.http.NetworkImgAsyncTask;
 import cn.hongjitech.vehicle.initTestData.ProjectTestData;
+import cn.hongjitech.vehicle.javaBean.GPSBean;
+import cn.hongjitech.vehicle.javaBean.GPSBeanRoot;
 import cn.hongjitech.vehicle.javaBean.InitializationRoot;
 import cn.hongjitech.vehicle.javaBean.User;
 import cn.hongjitech.vehicle.map.TCPClient;
@@ -55,6 +57,8 @@ import cn.hongjitech.vehicle.map.TcpMessage;
 import cn.hongjitech.vehicle.map.TcpPresenter;
 import cn.hongjitech.vehicle.map.tcpConnectState;
 import cn.hongjitech.vehicle.service.SerialPortService;
+import cn.hongjitech.vehicle.socket.MyLog;
+import cn.hongjitech.vehicle.socket.SocThread;
 import cn.hongjitech.vehicle.util.ExamDataUtil;
 import cn.hongjitech.vehicle.util.FilesUtil;
 import cn.hongjitech.vehicle.util.ParsetoXWCJ;
@@ -215,7 +219,8 @@ public class ExamProcessActivity extends BaseActivity {
     private int index = 0;//线程进入的次数
     private TcpPresenter tp = TcpPresenter.getInstance();
     private TextView tv1, tv2;
-    MediaPlayer mp;
+    private MediaPlayer mp;
+    private SocThread socketThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -294,6 +299,7 @@ public class ExamProcessActivity extends BaseActivity {
         startTime = System.currentTimeMillis();
         timeThread = new TimeThread();
         serialPortThread = new SerialPortThread();
+        socketThread = new SocThread(m_rev_handler, m_sent_handler, ExamProcessActivity.this);
 
         try {
             parsetoXWCJ = new ParsetoXWCJ(ExamProcessActivity.this);
@@ -306,9 +312,10 @@ public class ExamProcessActivity extends BaseActivity {
         }
 
         //创建线程池,将费时操作放进线程池中
-        executorService = Executors.newFixedThreadPool(2);
+        executorService = Executors.newFixedThreadPool(3);
         executorService.execute(timeThread);
         executorService.execute(serialPortThread);
+        executorService.execute(socketThread);
 
         //加载项目列表信息(暂时临时数据)
         ProjectTestData p = new ProjectTestData();
@@ -433,6 +440,9 @@ public class ExamProcessActivity extends BaseActivity {
                     exitThread();
                     break;
                 case R.id.ib_dialog_test_returnExam://考试完成dialog,补考
+                    exitThread();
+//                    EventBus.getDefault().unregister(this);
+//                    TcpPresenter.getInstance().stopReciveData();
                     examIndex--;
                     alertDialogForPass.cancel();
                     initUserData();
@@ -440,12 +450,14 @@ public class ExamProcessActivity extends BaseActivity {
                 case R.id.ib_dialog_test_over://考试完成dialog,结束考试
                     if (examIndex == 1) {
                         sendOverImgUrl();
+//                        postExamPro();
                     }
                     alertDialogForPass.cancel();
                     intent = new Intent(ExamProcessActivity.this, StuApproveActivity.class);
                     startActivity(intent);
                     ExamProcessActivity.this.finish();
                     exitThread();
+                    EventBus.getDefault().unregister(this);
                     break;
                 case R.id.iv_exam_right_map://地图上地图按钮
                     iv_exam_right_map.setImageResource(R.drawable.map_check);
@@ -517,6 +529,7 @@ public class ExamProcessActivity extends BaseActivity {
      * 设置结束后是否通过的窗口提醒
      */
     private void showDialogForPass() {
+
         View view = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_exam_error, null);
         alertDialogForPass = new AlertDialog.Builder(this).setTitle(null).setMessage(null).setView(view).create();
         iv_dialog_test_face = (ImageView) view.findViewById(R.id.iv_dialog_test_face);
@@ -541,6 +554,7 @@ public class ExamProcessActivity extends BaseActivity {
             Toast.makeText(ExamProcessActivity.this, "您今天已没有考试机会!", Toast.LENGTH_SHORT).show();
         }
         alertDialogForPass.show();
+        alertDialogForPass.setCancelable(false);
     }
 
     /**
@@ -571,15 +585,15 @@ public class ExamProcessActivity extends BaseActivity {
                 case 0://时间相关
                     tv_exam_current_time.setText(StringUtils.getCurrentTime("HH:mm:ss"));
                     tv_exam_stu_useTime.setText(showTimeCount(System.currentTimeMillis() - startTime));
-//                    if (timeList.size() != 0) {
-//                        for (int i = 0; i < timeList.size(); i++) {
-//                            if (StringUtils.getCurrentTime("HH:mm:ss").equals(timeList.get(i))) {
-//                                //进行拍照
-//                                Log.d("TAG", "进入随机拍照");
-//                                sendImgUrl();
-//                            }
-//                        }
-//                    }
+                    if (timeList.size() != 0) {
+                        for (int i = 0; i < timeList.size(); i++) {
+                            if (StringUtils.getCurrentTime("HH:mm:ss").equals(timeList.get(i))) {
+                                //进行拍照
+                                Log.d("TAG", "进入随机拍照");
+                                sendImgUrl();
+                            }
+                        }
+                    }
                     break;
                 case 1:
                     tv_exam_mark_speed.setText(SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_speed", "0") + "km/h");//车速
@@ -593,6 +607,8 @@ public class ExamProcessActivity extends BaseActivity {
                             lv_exam_pro_info.setSelection(1);
                         }
                     }
+
+//                    Log.e("ASD",SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", ""));
 
                     //点火1
                     if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("01")) {
@@ -741,42 +757,18 @@ public class ExamProcessActivity extends BaseActivity {
                     tv_ultrasonic_two.setText(SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_ultrasonic_2", ""));
 
 //                    if (startExamC == 1) {
-                    parsetoXWCJ.getXWCJ();
+                        parsetoXWCJ.getXWCJ();
 //                    }
 
+                    //安全带判断
                     if (!SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("")) {
-//                        Log.e("TAG",SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", ""));
-                        //判断是否在点火前
-                        if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("02")) {
-
-//                            projectAdapter.setSelectedPosition(0);
-//                            projectAdapter.notifyDataSetChanged();
-//                            lv_exam_pro_info.setSelection(0);
-
-                            //判断是否在熄火状态下调整左后视镜
-                            if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_left_rearview_mirror", "").equals("01")) {
-                                leftTag = 1;
-                            }
-                            //判断是否在熄火状态下调整座椅
-                            if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_seat_adjustment", "").equals("01")) {
-                                seatTag = 1;
-                            }
-                            //判断是否在熄火状态下调整中央后视镜
-                            if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_central_rearview_mirror", "").equals("01")) {
-                                centralTag = 1;
-                            }
-                            //判断是否进行了考试前准备
-                            if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_door", "").equals("FB") &&
-                                    SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_belt_info", "").equals("40") &&
-                                    seatTag == 1 && centralTag == 1 && leftTag == 1) {
-                                startExamC = 1;
-                                parsetoXWCJ.getXWCJ();
-                            } else {
+                        if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("02") && startExamC == 0) {
+                            if (!SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_belt_info", "").equals("40")) {
                                 index++;
                                 if (index == 1) {
                                     if (!activityType.equals("trainTest")) {
                                         fraction = 100;
-                                        list.add(new MarkingBean("上车准备", "100", "准备不充分!", ""));
+                                        list.add(new MarkingBean("上车准备", "100", "不按规定使用安全带!", "", "10101"));
                                         markingAdapter.notifyDataSetChanged();
                                         tv_exam_stu_passNum.setText(String.valueOf(list.size()));
                                         lv_exam_mark_info.setSelection(markingAdapter.getCount());
@@ -784,13 +776,89 @@ public class ExamProcessActivity extends BaseActivity {
                                         exitThread();
                                     }
                                 }
+                            } else {
+//                                startExamC = 1;
+//                                parsetoXWCJ.getXWCJ();
                             }
-                        } else {
+                        }
+                    }
+
+//                    if (!SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("")) {
+////                        Log.e("TAG",SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", ""));
+//                        //判断是否在点火前
+//                        if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("01") && startExamC == 0) {
+//
+////                            projectAdapter.setSelectedPosition(0);
+////                            projectAdapter.notifyDataSetChanged();
+////                            lv_exam_pro_info.setSelection(0);
+//
+//                            //判断是否在熄火状态下调整左后视镜
+//                            if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_left_rearview_mirror", "").equals("01")) {
+//                                leftTag = 1;
+//                            }
+//                            //判断是否在熄火状态下调整座椅
+//                            if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_seat_adjustment", "").equals("01")) {
+//                                seatTag = 1;
+//                            }
+//                            //判断是否在熄火状态下调整中央后视镜
+//                            if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_central_rearview_mirror", "").equals("01")) {
+//                                centralTag = 1;
+//                            }
+//                        }
+//
+//                        if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("02")) {
+//                            if (!SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_door", "").equals("FB")) {
+//
+//                            } else if (!SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_belt_info", "").equals("40")) {
+//                                mb = new MarkingBean("上车准备", "100", "准备不充分!", "", "10101");
+//                            }
+//
+//                            if (mb != null) {
+//                                index++;
+//                                if (index == 1) {
+//                                    if (!activityType.equals("trainTest")) {
+//                                        fraction = 100;
+//                                        list.add(new MarkingBean("上车准备", "100", "准备不充分!", "", "10101"));
+//                                        markingAdapter.notifyDataSetChanged();
+//                                        tv_exam_stu_passNum.setText(String.valueOf(list.size()));
+//                                        lv_exam_mark_info.setSelection(markingAdapter.getCount());
+//                                        showDialogForPass();
+//                                        exitThread();
+//                                    }
+//                                }
+//                            }
+//
+//                            //判断是否进行了考试前准备
+//                            if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_door", "").equals("FB") &&
+//                                    SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_belt_info", "").equals("40") &&
+//                                    seatTag == 1 && centralTag == 1 && leftTag == 1) {
+////                                Log.e("TAG", "startExamC" + startExamC);
+//                                startExamC = 1;
+//                                parsetoXWCJ.getXWCJ();
+//                            } else {
+//                                index++;
+//                                if (index == 1) {
+//                                    if (!activityType.equals("trainTest")) {
+//                                        fraction = 100;
+//                                        list.add(new MarkingBean("上车准备", "100", "准备不充分!", "", "10101"));
+//                                        markingAdapter.notifyDataSetChanged();
+//                                        tv_exam_stu_passNum.setText(String.valueOf(list.size()));
+//                                        lv_exam_mark_info.setSelection(markingAdapter.getCount());
+//                                        showDialogForPass();
+//                                        exitThread();
+//                                    }
+//                                }
+//                            }
+//                        }
+
+//                            }
+//                        }
+//                        else {
 //                            index++;
 //                            if (index == 1) {
 //                                if (!activityType.equals("trainTest")) {
 //                                    fraction = 100;
-//                                    list.add(new MarkingBean("上车准备", "100", "准备不充分!"));
+//                                    list.add(new MarkingBean("上车准备", "100", "准备不充分!", ""));
 //                                    markingAdapter.notifyDataSetChanged();
 //                                    tv_exam_stu_passNum.setText(String.valueOf(list.size()));
 //                                    lv_exam_mark_info.setSelection(markingAdapter.getCount());
@@ -798,10 +866,10 @@ public class ExamProcessActivity extends BaseActivity {
 //                                    exitThread();
 //                                }
 //                            }
-                        }
-                    } else {
-                        Log.e(TAG, "点火状态为空!");
-                    }
+//                        }
+//                    } else {
+//                        Log.e(TAG, "点火状态为空!");
+//                    }
                     break;
             }
         }
@@ -813,15 +881,14 @@ public class ExamProcessActivity extends BaseActivity {
     private void exitThread() {
         timeFlag = false;
         serialPortThreadFlag = false;
-        if (timeThread != null) {
-            timeThread = null;
-        }
+
         try {
             stopSerialPort();
         } catch (SecurityException s) {
             Log.e(TAG, s.toString());
         }
-        EventBus.getDefault().unregister(this);
+        stopSocket();
+//        EventBus.getDefault().unregister(this);
         TcpPresenter.getInstance().stopReciveData();
     }
 
@@ -839,8 +906,7 @@ public class ExamProcessActivity extends BaseActivity {
             case 0:
                 if (data != null && data.getSerializableExtra("markingBean") != null) {
                     markingBean = (MarkingBean) data.getSerializableExtra("markingBean");
-                    markingSubjrct = markingBean.getMarkProject();
-                    getStartExamination();
+//                    getStartExamination(markingBean.getMarkProject());
                     list.add(markingBean);
                     tv_exam_stu_passNum.setText(String.valueOf(list.size()));
                     markingAdapter.notifyDataSetChanged();
@@ -869,20 +935,20 @@ public class ExamProcessActivity extends BaseActivity {
     /**
      * 上传随机图片
      */
-//    private void sendImgUrl() {
-//        paramMap = new HashMap<String, String>();
-//        paramMap.put("ksxm", subject);
-//        paramMap.put("sfzmhm", user.getUser_id_card());
-//        paramMap.put("cs", "123");
-//        paramMap.put("car_num", getCarNum());
-//        paramMap.put("timestamp", String.valueOf(System.currentTimeMillis()));
-//
-//        Map<String, File> fileMap = new HashMap<String, File>();
-//        fileMap.put("zp", new File(Environment.getExternalStorageDirectory().getPath() + "/Pictures/assess_fail.png"));
-//        NetworkImgAsyncTask networkImgAsyncTask = new NetworkImgAsyncTask("http://examination.91vh.com/api/examination_img",
-//                SharedPrefsUtils.getValue(ExamProcessActivity.this, "token", ""), paramMap, fileMap, handler, 102);
-//        networkImgAsyncTask.execute();
-//    }
+    private void sendImgUrl() {
+        paramMap = new HashMap<String, String>();
+        paramMap.put("ksxm", subject);
+        paramMap.put("sfzmhm", user.getUser_id_card());
+        paramMap.put("cs", SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_speed", "0"));
+        paramMap.put("car_num", getCarNum());
+        paramMap.put("timestamp", String.valueOf(System.currentTimeMillis()));
+
+        Map<String, File> fileMap = new HashMap<String, File>();
+        fileMap.put("zp", new File(Environment.getExternalStorageDirectory().getPath() + "/Pictures/assess_fail.png"));
+        NetworkImgAsyncTask networkImgAsyncTask = new NetworkImgAsyncTask("http://examination.91vh.com/api/examination_img",
+                SharedPrefsUtils.getValue(ExamProcessActivity.this, "token", ""), paramMap, fileMap, handler, 102);
+        networkImgAsyncTask.execute();
+    }
 
     /**
      * 上传整个考试结束
@@ -901,11 +967,13 @@ public class ExamProcessActivity extends BaseActivity {
     }
 
     /**
-     * 上传项目
+     * 五小项每一项的开始
      */
-    private void getStartExamination() {
+    private void getStartExamination(String markingSubjrct) {
+//        String param = "car_num=" + getCarNum() + "&sfzmhm=" + user.getUser_id_card() + "&timestamp=" + String.valueOf(System.currentTimeMillis())
+//                + "&ksxm=" + subject + "&kfxm=" + markingSubjrct + "&sbxh=" + getDeviceID();
         String param = "car_num=" + getCarNum() + "&sfzmhm=" + user.getUser_id_card() + "&timestamp=" + String.valueOf(System.currentTimeMillis())
-                + "&ksxm=" + subject + "&kfxm=" + markingSubjrct + "&sbxh=" + getDeviceID();
+                + "&ksxm=" + subject + "&sbxh=" + getDeviceID();
         networkAsyncTask = new NetworkAsyncTask(url_subject,
                 "POST",
                 SharedPrefsUtils.getValue(ExamProcessActivity.this, "token", ""),
@@ -916,11 +984,28 @@ public class ExamProcessActivity extends BaseActivity {
     }
 
     /**
-     * 上传单一完成的项目
+     * 考试扣分
      */
-    private void postExamPro() {
+    private void setMarking(String ksxm, String kfxm) {
+//        String param = "car_num=" + getCarNum() + "&sfzmhm=" + user.getUser_id_card() + "&timestamp=" + String.valueOf(System.currentTimeMillis())
+//                + "&ksxm=" + subject + "&kfxm=" + markingSubjrct + "&sbxh=" + getDeviceID();
         String param = "car_num=" + getCarNum() + "&sfzmhm=" + user.getUser_id_card() + "&timestamp=" + String.valueOf(System.currentTimeMillis())
-                + "&ksxm=" + subject + "&sbxh=" + getDeviceID();
+                + "&ksxm=" + ksxm + "&kfxm=" + kfxm;
+        networkAsyncTask = new NetworkAsyncTask("http://examination.91vh.com/api/exam_marking",
+                "POST",
+                SharedPrefsUtils.getValue(ExamProcessActivity.this, "token", ""),
+                param,
+                handler,
+                5);
+        networkAsyncTask.execute();
+    }
+
+    /**
+     * 考试项目结束,单一项目结束
+     */
+    private void postExamPro(String ksxm) {
+        String param = "car_num=" + getCarNum() + "&sfzmhm=" + user.getUser_id_card() + "&timestamp=" + String.valueOf(System.currentTimeMillis())
+                + "&ksxm=" + ksxm + "&sbxh=" + getDeviceID();
         networkAsyncTask = new NetworkAsyncTask(url_examPro,
                 "POST",
                 SharedPrefsUtils.getValue(ExamProcessActivity.this, "token", ""),
@@ -965,6 +1050,14 @@ public class ExamProcessActivity extends BaseActivity {
                         Log.d("TAG Result", "单一项目上传成功");
                     } else {
                         Log.d("TAG Result", "单一项目上传失败");
+                    }
+                    break;
+                case 5:
+                    gson = new Gson();
+                    if (gson.fromJson(msg.obj.toString(), InitializationRoot.class).getResult().equals("succeed")) {
+                        Log.d("TAG Result", "扣分成功");
+                    } else {
+                        Log.d("TAG Result", "扣分失败");
                     }
                     break;
             }
@@ -1102,36 +1195,13 @@ public class ExamProcessActivity extends BaseActivity {
         }
     }
 
+    /**
+     * 连接练一练IP
+     */
     private void initTcp() {
         TcpPresenter.getInstance().startReciveData();
         sendMessageToCar();
     }
-
-//    /**
-//     * TcpMessage
-//     *
-//     * @param obj
-//     */
-//    @Subscribe(threadMode = ThreadMode.MAIN)
-//    public void onEventMainThread(TcpMessage obj) {
-//        Message message = new Message();
-//        message.what = 0;
-//        message.obj = obj.strMsg.toString();
-//        handelr.sendMessage(message);
-//    }
-//
-//    /**
-//     * TcpMessage
-//     *
-//     * @param obj
-//     */
-//    @Subscribe(threadMode = ThreadMode.MAIN)
-//    public void onEventMainThread(tcpConnectState obj) {
-//        Message message = new Message();
-//        message.what = 0;
-//        message.obj = obj.strMsg.toString();
-//        handelr.sendMessage(message);
-//    }
 
     /**
      * TcpMessage
@@ -1207,8 +1277,8 @@ public class ExamProcessActivity extends BaseActivity {
     private void xwcj(String strMsg) {
         if (!TextUtils.isEmpty(strMsg) && strMsg.length() > 7) {
             if (strMsg.indexOf("$XWCJ") > -1) {
-                tv1.setText(strMsg);
-                Log.e(TAG, strMsg);
+//                tv1.setText(strMsg);
+//                MyLog.e("TAG", strMsg);
             }
         }
     }
@@ -1256,13 +1326,24 @@ public class ExamProcessActivity extends BaseActivity {
         if (!TextUtils.isEmpty(strMsg) && strMsg.length() > 7) {
             String str = strMsg.substring(0, 6);
             if (str.equals("$GPHPD")) {
+                String num = "0";
                 String[] s = strMsg.split(",");
                 String latitude = s[6];
                 String longitude = s[7];
+                //发送gps到服务器
+                if (examIndex == 2) {
+                    num = "1";
+                } else if (examIndex == 1) {
+                    num = "2";
+                }
+                gson = new Gson();
+                String jsonGPS = gson.toJson(new GPSBeanRoot(getCarNum(), "A", "1", new GPSBean(tv_exam_stu_id.getText().toString(), num, proStr, SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_speed", "0"), longitude, latitude)));
+                if (socketThread != null && jsonGPS != null) {
+                    socketThread.Send(jsonGPS);
+                }
             }
         }
     }
-
 
     float hfloat, pfloat, rfloat, xfloat, yfloat, zfloat;
     String hString, pString, rString, xString, yString, zString;
@@ -1304,6 +1385,8 @@ public class ExamProcessActivity extends BaseActivity {
         my_view.invalidate();
     }
 
+    private String end;
+
     /**
      * 处理扣分数据,进行判断显示
      *
@@ -1321,6 +1404,15 @@ public class ExamProcessActivity extends BaseActivity {
                     //设置正在进行项在最上面显示
                     lv_exam_pro_info.setSelection(i);
                     proStr = markingBean.getMarkProject();
+                    if(end != proStr){
+                        if(end != null){
+                            postExamPro(end);
+                            end = proStr;
+                        }
+                    }else{
+
+                    }
+                    getStartExamination(proStr);
                 }
             }
         }
@@ -1333,7 +1425,41 @@ public class ExamProcessActivity extends BaseActivity {
                 markingAdapter.notifyDataSetChanged();
                 tv_exam_stu_passNum.setText(String.valueOf(list.size()));
                 lv_exam_mark_info.setSelection(markingAdapter.getCount());
-                judgmentFraction();
+                if (activityType.equals("stuApprove")) {
+                    if (markingBean.getMarkRes().equals("中途停车")) {
+                        switch (proStr) {
+                            case "倒车入库":
+                                markingBean.setMarkProject("倒车入库");
+                                break;
+                            case "侧方停车":
+                                markingBean.setMarkProject("侧方停车");
+                                break;
+                            case "曲线行驶":
+                                markingBean.setMarkProject("曲线行驶");
+                                break;
+                            case "直角转弯":
+                                markingBean.setMarkProject("直角转弯");
+                                break;
+                        }
+                    }
+                    setMarking(markingBean.getMarkProject(), markingBean.getCode());
+                }
+                if (judgmentFraction()) {
+                    switch (activityType) {
+                        case "stuApprove"://考试
+                            showDialogForPass();
+                            break;
+                        case "training"://考核
+                            setUserInfo();
+                            intent = new Intent(ExamProcessActivity.this, AssessActivity.class);
+                            intent.putExtra("userInfo", userInfo);
+                            intent.putExtra("user", user);
+                            startActivity(intent);
+                            ExamProcessActivity.this.finish();
+                            exitThread();
+                            break;
+                    }
+                }
             }
         }//如果返回的对象全都有值,则直接显示到列表中
         else if (!markingBean.getMarkProject().equals("") && !markingBean.getMarkFraction().equals("") && !markingBean.getMarkRes().equals("") && !markingBean.getMarkRes().equals("开始")) {
@@ -1342,7 +1468,25 @@ public class ExamProcessActivity extends BaseActivity {
             markingAdapter.notifyDataSetChanged();
             tv_exam_stu_passNum.setText(String.valueOf(list.size()));
             lv_exam_mark_info.setSelection(markingAdapter.getCount());
-            judgmentFraction();
+            if (activityType.equals("stuApprove")) {
+                setMarking(markingBean.getMarkProject(), markingBean.getCode());
+            }
+            if (judgmentFraction()) {
+                switch (activityType) {
+                    case "stuApprove"://考试
+                        showDialogForPass();
+                        break;
+                    case "training"://考核
+                        setUserInfo();
+                        intent = new Intent(ExamProcessActivity.this, AssessActivity.class);
+                        intent.putExtra("userInfo", userInfo);
+                        intent.putExtra("user", user);
+                        startActivity(intent);
+                        ExamProcessActivity.this.finish();
+                        exitThread();
+                        break;
+                }
+            }
         }
     }
 
@@ -1362,6 +1506,64 @@ public class ExamProcessActivity extends BaseActivity {
             Log.e("Error", io.toString());
         } catch (Exception e) {
             Log.e("Error", e.toString());
+        }
+    }
+
+    /**
+     * 开启gps传输
+     */
+    public void startSocket() {
+        socketThread = new SocThread(m_rev_handler, m_sent_handler, ExamProcessActivity.this);
+        socketThread.start();
+    }
+
+    Handler m_rev_handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            try {
+//                MyLog.i(TAG, "m_rev_handler接收到msg=" + msg.what);
+                if (msg.obj != null) {
+                    String s = msg.obj.toString();
+                    if (s.trim().length() > 0) {
+//                        MyLog.i(TAG, "m_rev_handler接收到obj=" + s);
+//                        MyLog.i(TAG, "开始更新UI");
+//                        tv1.append("Server:" + s);
+//                        MyLog.i(TAG, "更新UI完毕");
+                    } else {
+                        Log.i(TAG, "没有数据返回不更新");
+                    }
+                }
+            } catch (Exception ee) {
+                MyLog.i(TAG, "加载过程出现异常");
+                ee.printStackTrace();
+            }
+        }
+    };
+    Handler m_sent_handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            try {
+//                MyLog.i(TAG, "m_sent_handler接收到msg.what=" + msg.what);
+                String s = msg.obj.toString();
+                if (msg.what == 1) {
+                    MyLog.i(TAG, "发送成功");
+//                    tv1.append("\n ME: " + s + "      发送成功");
+                } else {
+//                    tv1.append("\n ME: " + s + "     发送失败");
+                }
+            } catch (Exception ee) {
+                MyLog.i(TAG, "加载过程出现异常");
+                ee.printStackTrace();
+            }
+        }
+    };
+
+    private void stopSocket() {
+        if (socketThread != null) {
+            socketThread.isRun = false;
+            socketThread.close();
+            socketThread = null;
+            MyLog.i(TAG, "Socket已终止");
         }
     }
 }

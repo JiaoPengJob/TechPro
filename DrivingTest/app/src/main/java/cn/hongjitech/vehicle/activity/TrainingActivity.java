@@ -24,6 +24,9 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.zkteco.android.biometric.core.device.ParameterHelper;
@@ -36,6 +39,12 @@ import com.zkteco.android.biometric.module.fingerprintreader.FingprintFactory;
 import com.zkteco.android.biometric.module.fingerprintreader.ZKFingerService;
 import com.zkteco.android.biometric.module.fingerprintreader.exception.FingerprintException;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.reflect.Type;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -113,6 +122,7 @@ public class TrainingActivity extends BaseActivity {
     private String activityDis;//判断点击的是考核还是测试
     private int appointment_id;//预约信息ID
     private String carUrl = "backend";
+    private String[] fingerResults;
     /*---------指纹仪参数对象----------------*/
     private FingerprintSensor fingerprintSensor = null;
     private static final int SVID = 6997;
@@ -141,10 +151,10 @@ public class TrainingActivity extends BaseActivity {
         if (StringUtils.isNetworkConnected(TrainingActivity.this)) {
             if (getCarId() != null) {
                 refreshData();
-                try{
+                try {
                     getConnectForReservation();
-                }catch (Exception e){
-                    Log.e("Error",e.toString());
+                } catch (Exception e) {
+                    Log.e("Error", e.toString());
                 }
                 startService();
                 startFingerprintSensor();
@@ -178,10 +188,10 @@ public class TrainingActivity extends BaseActivity {
                     @Override
                     protected void onPostExecute(List<ReservationInfo> reslst) {
                         if (getCarId() != null) {
-                            try{
+                            try {
                                 getConnectForReservation();
-                            }catch (Exception e){
-                                Log.e("Error",e.toString());
+                            } catch (Exception e) {
+                                Log.e("Error", e.toString());
                             }
 
                         }
@@ -226,23 +236,25 @@ public class TrainingActivity extends BaseActivity {
                     appointment_id = reservationStatusAdapter.getItem(position - 1).getAppointment().getId();
                     SharedPrefsUtils.putValue(TrainingActivity.this, "appointment_id", String.valueOf(appointment_id));
                     String paramUserUrl = userUrl + "/" + reservationStatusAdapter.getItem(position - 1).getAppointment().getUser_id();
+//                    String paramUserUrl = userUrl + "/" + "61";
                     getUserInfo(paramUserUrl, reservationStatusAdapter.getItem(position - 1));
                     getAdminInfo(adminUrl + reservationStatusAdapter.getItem(position - 1).getAppointment().getAdmin_id());
                     endTime = reservationStatusAdapter.getItem(position - 1).getFinish_time();
                     /**
                      *  判断选中的学员是否应在当前时间开始进行学习
                      */
-//                    if (StringUtils.betweenDate(StringUtils.str2Date(reservationStatusAdapter.getItem(position - 1).getStart_time(), "HH:mm:ss"),
-//                            StringUtils.str2Date(reservationStatusAdapter.getItem(position - 1).getStart_time(), "HH:mm:ss"),
-//                            StringUtils.getCurrentDate("HH:mm:ss"))) {
-//                        iv_tran_assess.setClickable(true);
-//                        iv_tran_test.setClickable(true);
-//                    } else {
-//                        Toast.makeText(TrainingActivity.this, "此学员预约时间不匹配,无法进行下一步", Toast.LENGTH_SHORT).show();
-//                        iv_tran_assess.setClickable(false);
-//                        iv_tran_test.setClickable(false);
-//                    }
-//                    }
+//                    Log.e("TAGS", "11--" + StringUtils.str2Date(reservationStatusAdapter.getItem(position - 1).getStart_time(), "HH:mm:ss"));
+//                    Log.e("TAGS", "22--" + StringUtils.str2Date(reservationStatusAdapter.getItem(position - 1).getFinish_time(), "HH:mm:ss"));
+                    if (StringUtils.betweenDate(StringUtils.str2Date(reservationStatusAdapter.getItem(position - 1).getStart_time(), "HH:mm:ss"),
+                            StringUtils.str2Date(reservationStatusAdapter.getItem(position - 1).getFinish_time(), "HH:mm:ss"),
+                            StringUtils.getCurrentDate("HH:mm:ss"))) {
+                        iv_tran_assess.setClickable(true);
+                        iv_tran_test.setClickable(true);
+                    } else {
+                        Toast.makeText(TrainingActivity.this, "此学员预约时间不匹配,无法进行下一步", Toast.LENGTH_SHORT).show();
+                        iv_tran_assess.setClickable(false);
+                        iv_tran_test.setClickable(false);
+                    }
                 }
             }
         });
@@ -370,7 +382,7 @@ public class TrainingActivity extends BaseActivity {
     /**
      * 获取服务器系统图片
      */
-    private void getImg(String url,ImageView iv) {
+    private void getImg(String url, ImageView iv) {
         VolleyManager.newInstance().ImageLoaderRequest
                 (iv, url, R.drawable.empty_user_photo, R.drawable.empty_user_photo, 125, 250);
     }
@@ -385,7 +397,7 @@ public class TrainingActivity extends BaseActivity {
                     public void onResponse(ReservationInfoRoot reservationInfoRoot) {
                         if (reservationInfoRoot.getData() != null) {
                             reservationStatusAdapter = new ReservationStatusAdapter(TrainingActivity.this, reservationInfoRoot.getData());
-                            if(reservationStatusAdapter != null){
+                            if (reservationStatusAdapter != null) {
                                 lv_tran_info.setAdapter(reservationStatusAdapter);
                             }
                         } else {
@@ -404,7 +416,7 @@ public class TrainingActivity extends BaseActivity {
     /**
      * 访问服务器获取用户信息
      */
-    private void getUserInfo(String url, final ReservationInfo reservationInfo) {
+    private void getUserInfo(final String url, final ReservationInfo reservationInfo) {
         VolleyManager.newInstance().GsonGetRequest("TAG", url, UserRoot.class,
                 new Response.Listener<UserRoot>() {
                     @Override
@@ -414,7 +426,11 @@ public class TrainingActivity extends BaseActivity {
                             tv_train_student_name.setText(user.getUser_truename());
                             tv_train_reservation_time.setText(reservationInfo.getStart_time() + " - " + reservationInfo.getFinish_time());
                             tv_train_code.setText(user.getUser_id_card());
-                            getImg(user.getUser_img(),iv_train_stu_photo_left);
+                            if (user.getFinger_data() != null) {
+                                String str = user.getFinger_data();
+                                str = str.substring(1, str.length() - 1);
+                                fingerResults = str.split(",");
+                            }
                         }
                     }
                 }, new Response.ErrorListener() {
@@ -520,8 +536,8 @@ public class TrainingActivity extends BaseActivity {
         if (serviceConnection != null) {
             try {
                 unbindService(serviceConnection);
-            }catch (IllegalArgumentException i){
-                Log.e("Training",i.toString());
+            } catch (IllegalArgumentException i) {
+                Log.e("Training", i.toString());
             }
         }
     }
@@ -561,7 +577,6 @@ public class TrainingActivity extends BaseActivity {
         public boolean handleMessage(Message msg) {
             //获取到身份证采集仪中的身份证号,进行对比
             if (user != null && zkCardReaderService.getCardIdInfo() != null) {
-                Log.d("Card", zkCardReaderService.getCardIdInfo());
                 if (user.getUser_id_card().equals(zkCardReaderService.getCardIdInfo())) {
                     iv_train_rcp_idCard.setImageResource(R.drawable.green_cirle);
                 } else {
@@ -611,10 +626,13 @@ public class TrainingActivity extends BaseActivity {
                                 LogHelper.i("width=" + fingerprintSensor.getImageWidth() + "\nHeight=" + fingerprintSensor.getImageHeight());
                                 //获取到指纹
                                 Bitmap bitmapFp = ToolUtils.renderCroppedGreyScaleBitmap(fpImage, fingerprintSensor.getImageWidth(), fingerprintSensor.getImageHeight());
-                                if (bitmapFp != null && bitmapFinger != null) {
+                                if (bitmapFp != null && fingerResults != null) {
                                     //将采集到的指纹与系统保存的指纹进行比对
-                                    int verifyResult = ZKFingerService.verify(StringUtils.bitmapToByte(bitmapFp, Bitmap.CompressFormat.PNG), StringUtils.bitmapToByte(bitmapFinger, Bitmap.CompressFormat.PNG));
-                                    if (verifyResult > 23) {
+                                    int verifyResult = ZKFingerService.verify(StringUtils.bitmapToByte(bitmapFp, Bitmap.CompressFormat.PNG), fingerResults[0].getBytes());
+                                    Log.e("TAG", fingerprintSensor.getImageWidth() + "/verifyResult--" + verifyResult);
+//                                    int verifyResultNext = ZKFingerService.verify(StringUtils.bitmapToByte(bitmapFp, Bitmap.CompressFormat.PNG), fingerResults[1].getBytes());
+                                    if (verifyResult < -23) {
+                                        Log.e("TAG", "jinru");
                                         iv_train_rcp_fingerprint.setImageResource(R.drawable.green_cirle);
                                     } else {
                                         iv_train_rcp_fingerprint.setImageResource(R.drawable.red_cirle);

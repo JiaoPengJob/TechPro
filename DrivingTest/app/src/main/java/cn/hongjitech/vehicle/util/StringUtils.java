@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
+import android.util.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -237,6 +238,7 @@ public class StringUtils {
         bmp.recycle();//自由选择是否进行回收
         byte[] result = output.toByteArray();//转换成功了
         try {
+            output.flush();
             output.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -322,6 +324,16 @@ public class StringUtils {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MINUTE, longTime);
         return converToString(calendar.getTime(), "HH:mm:ss");
+    }
+
+    /**
+     * Base64转Bitmap
+     * @param base64String
+     * @return
+     */
+    public static Bitmap base64ToBitmap(String base64String){
+        byte[] bytes = Base64.decode(base64String,Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(bytes,0,bytes.length);
     }
 
     /**

@@ -120,6 +120,7 @@ public class AssessActivity extends BaseActivity {
                     intent = new Intent(AssessActivity.this, ExamProcessActivity.class);
                     intent.putExtra("activity", "training");
                     intent.putExtra("user", user);
+                    intent.putExtra("userInfo", userInfo);
                     startActivity(intent);
                     AssessActivity.this.finish();
                     break;
@@ -127,6 +128,7 @@ public class AssessActivity extends BaseActivity {
                     intent = new Intent(AssessActivity.this, ExamProcessActivity.class);
                     intent.putExtra("activity", "trainTest");
                     intent.putExtra("user", user);
+                    intent.putExtra("userInfo", userInfo);
                     startActivity(intent);
                     AssessActivity.this.finish();
                     break;

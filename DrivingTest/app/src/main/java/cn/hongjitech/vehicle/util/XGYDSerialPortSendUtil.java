@@ -19,7 +19,8 @@ public class XGYDSerialPortSendUtil {
 
     public XGYDSerialPortSendUtil() {
         try {
-            mSerialPort = new SerialPort(new File("/dev/ttyAMA3"), 38400, 0);
+//            mSerialPort = new SerialPort(new File("/dev/ttyAMA3"), 38400, 0);//调试波特率
+            mSerialPort = new SerialPort(new File("/dev/ttyAMA3"), 115200, 0);//实际连线波特率
             mOutputStream = mSerialPort.getOutputStream();
         } catch (IOException i) {
             Log.e("Error", i.toString());

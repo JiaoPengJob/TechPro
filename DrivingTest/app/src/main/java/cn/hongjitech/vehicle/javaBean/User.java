@@ -33,6 +33,9 @@ public class User implements Serializable {
     private String apply_date;
     private String created_at;
     private String updated_at;
+    private String balance;
+    private String finger_id;
+    private String finger_data;
     private String hk_address;
     private String xz_address;
 
@@ -40,7 +43,7 @@ public class User implements Serializable {
     public User() {
     }
 
-    public User(int id, String user_img, String user_truename, String user_sex, String subject_1, String subject_2, String subject_3, String subject_4, String user_id_card, String user_telphone, int old_province_id, int old_city_id, int old_area_id, int new_province_id, int new_city_id, int new_area_id, String user_address, String user_email, int school_id, int licence_type_id, int class_id, String status, int is_healthy, String apply_date, String created_at, String updated_at, String hk_address, String xz_address) {
+    public User(int id, String user_img, String user_truename, String user_sex, String subject_1, String subject_2, String subject_3, String subject_4, String user_id_card, String user_telphone, int old_province_id, int old_city_id, int old_area_id, int new_province_id, int new_city_id, int new_area_id, String user_address, String user_email, int school_id, int licence_type_id, int class_id, String status, int is_healthy, String apply_date, String created_at, String updated_at, String balance, String finger_id, String finger_data, String hk_address, String xz_address) {
         this.id = id;
         this.user_img = user_img;
         this.user_truename = user_truename;
@@ -67,6 +70,9 @@ public class User implements Serializable {
         this.apply_date = apply_date;
         this.created_at = created_at;
         this.updated_at = updated_at;
+        this.balance = balance;
+        this.finger_id = finger_id;
+        this.finger_data = finger_data;
         this.hk_address = hk_address;
         this.xz_address = xz_address;
     }
@@ -277,6 +283,30 @@ public class User implements Serializable {
 
     public void setUpdated_at(String updated_at) {
         this.updated_at = updated_at;
+    }
+
+    public String getBalance() {
+        return balance;
+    }
+
+    public void setBalance(String balance) {
+        this.balance = balance;
+    }
+
+    public String getFinger_id() {
+        return finger_id;
+    }
+
+    public void setFinger_id(String finger_id) {
+        this.finger_id = finger_id;
+    }
+
+    public String getFinger_data() {
+        return finger_data;
+    }
+
+    public void setFinger_data(String finger_data) {
+        this.finger_data = finger_data;
     }
 
     public String getHk_address() {
