@@ -29,8 +29,15 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +45,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import android_serialport_api.SerialPort;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import cn.hongjitech.vehicle.R;
@@ -51,6 +59,7 @@ import cn.hongjitech.vehicle.initTestData.ProjectTestData;
 import cn.hongjitech.vehicle.javaBean.GPSBean;
 import cn.hongjitech.vehicle.javaBean.GPSBeanRoot;
 import cn.hongjitech.vehicle.javaBean.InitializationRoot;
+import cn.hongjitech.vehicle.javaBean.SerialPortBean;
 import cn.hongjitech.vehicle.javaBean.User;
 import cn.hongjitech.vehicle.map.TCPClient;
 import cn.hongjitech.vehicle.map.TcpMessage;
@@ -59,6 +68,7 @@ import cn.hongjitech.vehicle.map.tcpConnectState;
 import cn.hongjitech.vehicle.service.SerialPortService;
 import cn.hongjitech.vehicle.socket.MyLog;
 import cn.hongjitech.vehicle.socket.SocThread;
+import cn.hongjitech.vehicle.util.BufferHelper;
 import cn.hongjitech.vehicle.util.ExamDataUtil;
 import cn.hongjitech.vehicle.util.FilesUtil;
 import cn.hongjitech.vehicle.util.ParsetoXWCJ;
@@ -69,7 +79,7 @@ import okhttp3.internal.framed.Variant;
 
 /**
  * 开始进行考核,考试等流程
- * <p/>
+ * <p>
  * 当进行车辆操作时判断,分两种情况,一种是考试或考核,扣分大于二十则直接结束
  * 训练,一直到手动点击结束为止
  */
@@ -197,8 +207,12 @@ public class ExamProcessActivity extends BaseActivity {
     private String url_examPro = "http://examination.91vh.com/api/end_examination";//上传单一项目完成的URL
     private int examIndex = 2;//纪录考试的次数
     /*---------------------地图----------------------------*/
-    public static String ipString = "10.10.100.150";//链接地图的ip地址
-    public static int portnum = 8899;//端口号
+    private boolean mapThreadBol = true;
+    private String SERVER_IP = "192.168.137.199";
+    private int SERVERPORT = 8889;
+    private Socket mapSocket;
+    private BufferedReader input;
+    private InetAddress serverAddr;
     private DrawView my_view;//地图显示的组件
     private static int showtag = 4;//默认地图大小
     //sd卡地图文件的地址
@@ -221,6 +235,12 @@ public class ExamProcessActivity extends BaseActivity {
     private TextView tv1, tv2;
     private MediaPlayer mp;
     private SocThread socketThread;
+    private mapThread mapThread;
+    private SerialPort mSerialPort;
+    private InputStream mInputStream;
+    private boolean isPlaying = true;
+    private SThread thread;
+    public static Intent sIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -254,8 +274,8 @@ public class ExamProcessActivity extends BaseActivity {
             super.run();
             while (serialPortThreadFlag) {
                 try {
-                    //延迟500毫秒接收数据
-                    Thread.sleep(500);
+                    //延迟50毫秒接收数据
+                    Thread.sleep(50);
                     mHandler.sendEmptyMessage(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -285,25 +305,30 @@ public class ExamProcessActivity extends BaseActivity {
         centralTag = 0;
         leftTag = 0;
         goState = 0;
+        mapThreadBol = true;
         timeFlag = true;
         serialPortThreadFlag = true;
         mp = new MediaPlayer();
         intMap();
-        initTcp();
+//        initTcp();
         examDataUtil = new ExamDataUtil(ExamProcessActivity.this);
         gson = new GsonBuilder().enableComplexMapKeySerialization().create();
         tv_exam_stu_name.setText(user.getUser_truename());
         tv_exam_stu_id.setText(user.getUser_id_card());
         tv_exam_stu_startTime.setText(StringUtils.getCurrentTime("HH:mm:ss"));
 
+        open();
+        thread = new SThread();
+
         startTime = System.currentTimeMillis();
         timeThread = new TimeThread();
-        serialPortThread = new SerialPortThread();
+//        serialPortThread = new SerialPortThread();
         socketThread = new SocThread(m_rev_handler, m_sent_handler, ExamProcessActivity.this);
+        mapThread = new mapThread();
 
         try {
             parsetoXWCJ = new ParsetoXWCJ(ExamProcessActivity.this);
-            startSerialPortService();
+//            startSerialPortService();
         } catch (UnsatisfiedLinkError u) {
             Log.e("Error", u.toString());
             Toast.makeText(ExamProcessActivity.this, "未找到相关设备数据连接,请重试!", Toast.LENGTH_SHORT).show();
@@ -312,10 +337,11 @@ public class ExamProcessActivity extends BaseActivity {
         }
 
         //创建线程池,将费时操作放进线程池中
-        executorService = Executors.newFixedThreadPool(3);
+        executorService = Executors.newFixedThreadPool(4);
         executorService.execute(timeThread);
-        executorService.execute(serialPortThread);
+        executorService.execute(thread);
         executorService.execute(socketThread);
+        executorService.execute(mapThread);
 
         //加载项目列表信息(暂时临时数据)
         ProjectTestData p = new ProjectTestData();
@@ -324,11 +350,8 @@ public class ExamProcessActivity extends BaseActivity {
         lv_exam_pro_info.setSelection(0);
         projectAdapter.setSelectedPosition(0);
 
-        //加载扣分情况的列表数据(模拟数据)
+        //加载扣分情况的列表数据
         list = new ArrayList<MarkingBean>();
-//        for (int i = 0; i < 2; i++) {
-//            list.add(new MarkingBean("起步", "2", "操作不当发动机熄火" + i));
-//        }
 
         //添加适配器
         markingAdapter = new MarkingAdapter(ExamProcessActivity.this, list);
@@ -382,18 +405,6 @@ public class ExamProcessActivity extends BaseActivity {
         iv_exam_right_sigle.setOnClickListener(new ClickListener());
         max.setOnClickListener(new ClickListener());
         min.setOnClickListener(new ClickListener());
-        //设置项目列表的item监听事件
-//        lv_exam_pro_info.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                projectAdapter.setSelectedPosition(position);
-//                projectAdapter.notifyDataSetChanged();
-//                //设置正在进行项在最上面显示
-//                lv_exam_pro_info.setSelection(position);
-//                proSubject = projectAdapter.getItem(position);
-//                postExamPro();
-//            }
-//        });
     }
 
     /**
@@ -440,9 +451,6 @@ public class ExamProcessActivity extends BaseActivity {
                     exitThread();
                     break;
                 case R.id.ib_dialog_test_returnExam://考试完成dialog,补考
-                    exitThread();
-//                    EventBus.getDefault().unregister(this);
-//                    TcpPresenter.getInstance().stopReciveData();
                     examIndex--;
                     alertDialogForPass.cancel();
                     initUserData();
@@ -450,7 +458,6 @@ public class ExamProcessActivity extends BaseActivity {
                 case R.id.ib_dialog_test_over://考试完成dialog,结束考试
                     if (examIndex == 1) {
                         sendOverImgUrl();
-//                        postExamPro();
                     }
                     alertDialogForPass.cancel();
                     intent = new Intent(ExamProcessActivity.this, StuApproveActivity.class);
@@ -529,7 +536,7 @@ public class ExamProcessActivity extends BaseActivity {
      * 设置结束后是否通过的窗口提醒
      */
     private void showDialogForPass() {
-
+        exitThread();
         View view = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_exam_error, null);
         alertDialogForPass = new AlertDialog.Builder(this).setTitle(null).setMessage(null).setView(view).create();
         iv_dialog_test_face = (ImageView) view.findViewById(R.id.iv_dialog_test_face);
@@ -574,6 +581,58 @@ public class ExamProcessActivity extends BaseActivity {
         }
     }
 
+    private void open() {
+        //向串口发送开启命令
+        SerialPortSendUtil serialPortSendUtil = new SerialPortSendUtil();
+        serialPortSendUtil.sendMessage(new byte[]{0x55, (byte) 0xAA, 0x01, 0x01, 0x01});
+        try {
+            mSerialPort = new SerialPort(new File("/dev/ttyAMA2"), 9600, 0);
+            mInputStream = mSerialPort.getInputStream();
+        } catch (SecurityException s) {
+            Log.e("Error", s + "");
+        } catch (IOException i) {
+            Log.e("Error", i + "");
+        } catch (InvalidParameterException e) {
+            Log.e("Error", e + "");
+        }
+    }
+
+    class SThread extends Thread {
+        @Override
+        public void run() {
+            super.run();
+            while (isPlaying) {
+                try {
+                    if (mInputStream == null) return;
+                    //对串口数据进行处理
+                    int i = 0;
+                    if (mInputStream.available() >= 50) {
+                        byte[] buffer = new byte[50];
+                        int size = mInputStream.read(buffer, 0, 50);
+                        for (i = 0; i < 49; i++) {
+                            if (buffer[i] == (byte) 0xAA && buffer[i + 1] == (byte) 0x55) {
+                                break;
+                            }
+                        }
+                        if (i != 0) {
+                            mInputStream.read(buffer, 0, i);
+                            continue;
+                        }
+
+                        SerialPortBean spb = BufferHelper.commitBuffer(ExamProcessActivity.this, buffer);
+                        Message message = new Message();
+                        message.what = 1;
+                        message.obj = spb;
+                        mHandler.sendMessage(message);
+                    }
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
     /**
      * 对组件进行绑定,在界面显示
      */
@@ -595,169 +654,302 @@ public class ExamProcessActivity extends BaseActivity {
                         }
                     }
                     break;
+                case 2:
+                    if (msg.obj.toString() != null) {
+                        getXWYD2(msg.obj.toString());
+                        getEXAM(msg.obj.toString());
+                        getGPHPD(msg.obj.toString());
+                    }
+                    break;
                 case 1:
-                    tv_exam_mark_speed.setText(SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_speed", "0") + "km/h");//车速
-                    tv_exam_mark_gear.setText(SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_gear_info", "0"));//档位
-                    tv_exam_mark_rpm.setText(SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_rpm", "0") + "r/min");
-
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("03")) {
-                        if (goState == 0) {
-                            projectAdapter.setSelectedPosition(1);
-                            projectAdapter.notifyDataSetChanged();
-                            lv_exam_pro_info.setSelection(1);
+                    SerialPortBean spb = (SerialPortBean) msg.obj;
+                    if (spb != null) {
+                        tv_exam_mark_speed.setText(spb.getBf_speed() + "km/h");//车速
+                        if (spb.getBf_gear_info().equals("7")) {
+                            tv_exam_mark_gear.setText("倒档");
+                        } else if (spb.getBf_gear_info().equals("0")) {
+                            tv_exam_mark_gear.setText("空档");
+                        } else {
+                            tv_exam_mark_gear.setText(spb.getBf_gear_info());//档位
                         }
+                        tv_exam_mark_rpm.setText(spb.getBf_rpm() + "r/min");
+
+                        if (spb.getBf_engine_status().equals("03")) {
+                            if (goState == 0) {
+                                projectAdapter.setSelectedPosition(1);
+                                projectAdapter.notifyDataSetChanged();
+                                lv_exam_pro_info.setSelection(1);
+                            }
+                        }
+                        //点火1
+                        if (spb.getBf_engine_status().equals("01")) {
+                            iv_fire_one.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_fire_one.setImageResource(R.drawable.oval_gray);
+                        }
+                        //雨刷
+                        if (spb.getBf_wiper().equals("87")) {
+                            iv_wiper.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_wiper.setImageResource(R.drawable.oval_gray);
+                        }
+                        //点火2
+                        if (spb.getBf_engine_status().equals("02")) {
+                            iv_fire_two.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_fire_two.setImageResource(R.drawable.oval_gray);
+                        }
+                        //喇叭
+                        if (spb.getBf_speaker().equals("C1")) {
+                            iv_speaker.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_speaker.setImageResource(R.drawable.oval_gray);
+                        }
+                        //制动器
+                        if (spb.getBf_brake_status().equals("01")) {
+                            iv_brake_status.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_brake_status.setImageResource(R.drawable.oval_gray);
+                        }
+                        //车门
+                        if (spb.getBf_door().equals("FB")) {
+                            iv_door.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_door.setImageResource(R.drawable.oval_gray);
+                        }
+                        //安全带
+                        if (spb.getBf_belt_info().equals("40")) {
+                            iv_belt_info.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_belt_info.setImageResource(R.drawable.oval_gray);
+                        }
+                        //离合
+                        if (spb.getBf_clutch().equals("01")) {
+                            iv_clutch.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_clutch.setImageResource(R.drawable.oval_gray);
+                        }
+                        //报警灯
+                        if (spb.getBf_warning_light().equals("01")) {
+                            iv_warning_light.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_warning_light.setImageResource(R.drawable.oval_gray);
+                        }
+                        //手刹
+                        if (spb.getBf_hand_brake().equals("01")) {
+                            iv_hand_brake.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_hand_brake.setImageResource(R.drawable.oval_gray);
+                        }
+                        //视宽灯
+                        if (spb.getBf_position_light().equals("01")) {
+                            iv_position_light.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_position_light.setImageResource(R.drawable.oval_gray);
+                        }
+                        //副刹车
+                        if (spb.getBf_assistant_brake_status().equals("01")) {
+                            iv_assistant_brake_status.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_assistant_brake_status.setImageResource(R.drawable.oval_gray);
+                        }
+                        //左转灯
+                        if (spb.getBf_left_turn_light().equals("01")) {
+                            iv_left_turn_light.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_left_turn_light.setImageResource(R.drawable.oval_gray);
+                        }
+                        //右转灯
+                        if (spb.getBf_right_turn_light().equals("01")) {
+                            iv_right_turn_light.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_right_turn_light.setImageResource(R.drawable.oval_gray);
+                        }
+                        //中央后视镜
+                        if (spb.getBf_central_rearview_mirror().equals("01")) {
+                            iv_central_rearview_mirror.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_central_rearview_mirror.setImageResource(R.drawable.oval_gray);
+                        }
+                        //近光灯
+                        if (spb.getBf_dipped_headlight().equals("01")) {
+                            iv_dipped_headlight.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_dipped_headlight.setImageResource(R.drawable.oval_gray);
+                        }
+                        //座椅调整
+                        if (spb.getBf_seat_adjustment().equals("01")) {
+                            iv_seat_adjustment.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_seat_adjustment.setImageResource(R.drawable.oval_gray);
+                        }
+                        //远光灯
+                        if (spb.getBf_high_beam_light().equals("01")) {
+                            iv_high_beam_light.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_high_beam_light.setImageResource(R.drawable.oval_gray);
+                        }
+                        //左后视镜
+                        if (spb.getBf_left_rearview_mirror().equals("01")) {
+                            waihoushijing.setImageResource(R.drawable.oval_green);
+                        } else {
+                            waihoushijing.setImageResource(R.drawable.oval_gray);
+                        }
+                        //雾灯
+                        if (spb.getBf_foglight().equals("01")) {
+                            iv_foglight.setImageResource(R.drawable.oval_green);
+                        } else {
+                            iv_foglight.setImageResource(R.drawable.oval_gray);
+                        }
+                        //超声波距离信息1
+                        tv_ultrasonic_one.setText(spb.getBf_ultrasonic_1());
+                        //超声波距离信息2
+                        tv_ultrasonic_two.setText(spb.getBf_ultrasonic_2());
                     }
+//                    tv_exam_mark_speed.setText(SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_speed", "0") + "km/h");//车速
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_gear_info", "0").equals("7")) {
+//                        tv_exam_mark_gear.setText("倒档");
+//                    } else if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_gear_info", "0").equals("0")) {
+//                        tv_exam_mark_gear.setText("空档");
+//                    } else {
+//                        tv_exam_mark_gear.setText(SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_gear_info", "0"));//档位
+//                    }
+//                    tv_exam_mark_rpm.setText(SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_rpm", "0") + "r/min");
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("03")) {
+//                        if (goState == 0) {
+//                            projectAdapter.setSelectedPosition(1);
+//                            projectAdapter.notifyDataSetChanged();
+//                            lv_exam_pro_info.setSelection(1);
+//                        }
+//                    }
+//                    //点火1
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("01")) {
+//                        iv_fire_one.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_fire_one.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //雨刷
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_wiper", "").equals("87")) {
+//                        iv_wiper.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_wiper.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //点火2
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("02")) {
+//                        iv_fire_two.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_fire_two.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //喇叭
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_speaker", "").equals("C1")) {
+//                        iv_speaker.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_speaker.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //制动器
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_brake_status", "").equals("01")) {
+//                        iv_brake_status.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_brake_status.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //车门
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_door", "").equals("FB")) {
+//                        iv_door.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_door.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //安全带
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_belt_info", "").equals("40")) {
+//                        iv_belt_info.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_belt_info.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //离合
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_clutch", "").equals("01")) {
+//                        iv_clutch.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_clutch.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //报警灯
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_warning_light", "").equals("01")) {
+//                        iv_warning_light.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_warning_light.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //手刹
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_hand_brake", "").equals("01")) {
+//                        iv_hand_brake.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_hand_brake.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //视宽灯
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_position_light", "").equals("01")) {
+//                        iv_position_light.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_position_light.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //副刹车
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_assistant_brake_status", "").equals("01")) {
+//                        iv_assistant_brake_status.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_assistant_brake_status.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //左转灯
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_left_turn_light", "").equals("01")) {
+//                        iv_left_turn_light.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_left_turn_light.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //右转灯
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_right_turn_light", "").equals("01")) {
+//                        iv_right_turn_light.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_right_turn_light.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //中央后视镜
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_central_rearview_mirror", "").equals("01")) {
+//                        iv_central_rearview_mirror.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_central_rearview_mirror.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //近光灯
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_dipped_headlight", "").equals("01")) {
+//                        iv_dipped_headlight.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_dipped_headlight.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //座椅调整
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_seat_adjustment", "").equals("01")) {
+//                        iv_seat_adjustment.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_seat_adjustment.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //远光灯
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_high_beam_light", "").equals("01")) {
+//                        iv_high_beam_light.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_high_beam_light.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //左后视镜
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_left_rearview_mirror", "").equals("01")) {
+//                        waihoushijing.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        waihoushijing.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //雾灯
+//                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_foglight", "").equals("01")) {
+//                        iv_foglight.setImageResource(R.drawable.oval_green);
+//                    } else {
+//                        iv_foglight.setImageResource(R.drawable.oval_gray);
+//                    }
+//                    //超声波距离信息1
+//                    tv_ultrasonic_one.setText(SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_ultrasonic_1", ""));
+//                    //超声波距离信息2
+//                    tv_ultrasonic_two.setText(SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_ultrasonic_2", ""));
 
-//                    Log.e("ASD",SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", ""));
-
-                    //点火1
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("01")) {
-                        iv_fire_one.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_fire_one.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //雨刷
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_wiper", "").equals("87")) {
-                        iv_wiper.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_wiper.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //点火2
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("02")) {
-                        iv_fire_two.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_fire_two.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //喇叭
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_speaker", "").equals("C1")) {
-                        iv_speaker.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_speaker.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //制动器
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_brake_status", "").equals("01")) {
-                        iv_brake_status.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_brake_status.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //车门
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_door", "").equals("FB")) {
-                        iv_door.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_door.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //安全带
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_belt_info", "").equals("40")) {
-                        iv_belt_info.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_belt_info.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //离合
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_clutch", "").equals("01")) {
-                        iv_clutch.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_clutch.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //报警灯
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_warning_light", "").equals("01")) {
-                        iv_warning_light.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_warning_light.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //手刹
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_hand_brake", "").equals("01")) {
-                        iv_hand_brake.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_hand_brake.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //视宽灯
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_position_light", "").equals("01")) {
-                        iv_position_light.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_position_light.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //副刹车
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_assistant_brake_status", "").equals("01")) {
-                        iv_assistant_brake_status.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_assistant_brake_status.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //左转灯
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_left_turn_light", "").equals("01")) {
-                        iv_left_turn_light.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_left_turn_light.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //右转灯
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_right_turn_light", "").equals("01")) {
-                        iv_right_turn_light.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_right_turn_light.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //中央后视镜
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_central_rearview_mirror", "").equals("01")) {
-                        iv_central_rearview_mirror.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_central_rearview_mirror.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //近光灯
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_dipped_headlight", "").equals("01")) {
-                        iv_dipped_headlight.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_dipped_headlight.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //座椅调整
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_seat_adjustment", "").equals("01")) {
-                        iv_seat_adjustment.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_seat_adjustment.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //远光灯
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_high_beam_light", "").equals("01")) {
-                        iv_high_beam_light.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_high_beam_light.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //左后视镜
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_left_rearview_mirror", "").equals("01")) {
-                        waihoushijing.setImageResource(R.drawable.oval_green);
-                    } else {
-                        waihoushijing.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //雾灯
-                    if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_foglight", "").equals("01")) {
-                        iv_foglight.setImageResource(R.drawable.oval_green);
-                    } else {
-                        iv_foglight.setImageResource(R.drawable.oval_gray);
-                    }
-
-                    //超声波距离信息1
-                    tv_ultrasonic_one.setText(SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_ultrasonic_1", ""));
-
-                    //超声波距离信息2
-                    tv_ultrasonic_two.setText(SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_ultrasonic_2", ""));
 
 //                    if (startExamC == 1) {
-                        parsetoXWCJ.getXWCJ();
+                    parsetoXWCJ.getXWCJ();
 //                    }
 
                     //安全带判断
@@ -879,9 +1071,9 @@ public class ExamProcessActivity extends BaseActivity {
      * 线程的销毁
      */
     private void exitThread() {
+        mapThreadBol = false;
         timeFlag = false;
         serialPortThreadFlag = false;
-
         try {
             stopSerialPort();
         } catch (SecurityException s) {
@@ -889,7 +1081,7 @@ public class ExamProcessActivity extends BaseActivity {
         }
         stopSocket();
 //        EventBus.getDefault().unregister(this);
-        TcpPresenter.getInstance().stopReciveData();
+//        TcpPresenter.getInstance().stopReciveData();
     }
 
     /**
@@ -906,7 +1098,6 @@ public class ExamProcessActivity extends BaseActivity {
             case 0:
                 if (data != null && data.getSerializableExtra("markingBean") != null) {
                     markingBean = (MarkingBean) data.getSerializableExtra("markingBean");
-//                    getStartExamination(markingBean.getMarkProject());
                     list.add(markingBean);
                     tv_exam_stu_passNum.setText(String.valueOf(list.size()));
                     markingAdapter.notifyDataSetChanged();
@@ -1135,12 +1326,11 @@ public class ExamProcessActivity extends BaseActivity {
 
         new Handler().postDelayed(new Runnable() {
             public void run() {
-                my_view.SetZoomSize(0.1f);
+                my_view.SetZoomSize(0.5f);
                 my_view.invalidate();
             }
         }, 300);
     }
-
 
     /**
      * 查找sd卡中地图的tu.tu和che.che文件
@@ -1166,7 +1356,6 @@ public class ExamProcessActivity extends BaseActivity {
      * @param number
      */
     private void changeSize(int number) {
-
         switch (number) {
             case 1:
                 my_view.SetZoomSize(0.1f);
@@ -1205,11 +1394,16 @@ public class ExamProcessActivity extends BaseActivity {
 
     /**
      * TcpMessage
+     * <p>
+     * onEvent:如果使用onEvent作为订阅函数，那么该事件在哪个线程发布出来的，onEvent就会在这个线程中运行，也就是说发布事件和接收事件线程在同一个线程。使用这个方法时，在onEvent方法中不能执行耗时操作，如果执行耗时操作容易导致事件分发延迟。
+     * onEventMainThread:如果使用onEventMainThread作为订阅函数，那么不论事件是在哪个线程中发布出来的，onEventMainThread都会在UI线程中执行，接收事件就会在UI线程中运行，这个在Android中是非常有用的，因为在Android中只能在UI线程中跟新UI，所以在onEvnetMainThread方法中是不能执行耗时操作的。
+     * onEventBackground:如果使用onEventBackgrond作为订阅函数，那么如果事件是在UI线程中发布出来的，那么onEventBackground就会在子线程中运行，如果事件本来就是子线程中发布出来的，那么onEventBackground函数直接在该子线程中执行。
+     * onEventAsync：使用这个函数作为订阅函数，那么无论事件在哪个线程发布，都会创建新的子线程在执行onEventAsync.
      *
      * @param obj
      */
-    @Subscribe(threadMode = ThreadMode.BACKGROUND)
-    public void onEventBackgroundThread(TcpMessage obj) {
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void onEventAsync(TcpMessage obj) {
         Message message = new Message();
         message.what = 0;
         message.obj = obj.strMsg.toString();
@@ -1221,8 +1415,8 @@ public class ExamProcessActivity extends BaseActivity {
      *
      * @param obj
      */
-    @Subscribe(threadMode = ThreadMode.BACKGROUND)
-    public void onEventBackgroundThread(tcpConnectState obj) {
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void onEventAsync(tcpConnectState obj) {
         Message message = new Message();
         message.what = 0;
         message.obj = obj.strMsg.toString();
@@ -1236,9 +1430,9 @@ public class ExamProcessActivity extends BaseActivity {
         @Override
         public boolean handleMessage(Message msg) {
             String result = msg.obj.toString();
-            xwtcp(result);
-            res(result);
-            xwcj(result);
+//            xwtcp(result);
+//            res(result);
+//            xwcj(result);
             getXWYD2(result);
             getEXAM(result);
             getGPHPD(result);
@@ -1249,7 +1443,7 @@ public class ExamProcessActivity extends BaseActivity {
     private void res(String strMsg) {
         if (!TextUtils.isEmpty(strMsg) && strMsg.length() > 7) {
             if (strMsg.indexOf("$xwtcp,set,exam_startwork,ok*ff") > -1) {
-                String index = strMsg.substring(strMsg.indexOf("$xwtcp", 0), strMsg.indexOf("$xwtcp") + 20);
+//                String index = strMsg.substring(strMsg.indexOf("$xwtcp", 0), strMsg.indexOf("$xwtcp") + 20);
 //                tv1.setText(index);
             }
         }
@@ -1296,7 +1490,6 @@ public class ExamProcessActivity extends BaseActivity {
                     String index1 = str.substring(str.indexOf("$EXAM"), str.indexOf("*FF"));
                     String index2 = str.substring(str.lastIndexOf("$EXAM"), str.lastIndexOf("*FF"));
                     String[] s = index1.split(",");
-//                    tv1.setText(index1 + "");
                     String exam = s[1];
                     if (!exam.equals("bencixunliankaishi")) {
                         playMedia(exam);
@@ -1404,12 +1597,12 @@ public class ExamProcessActivity extends BaseActivity {
                     //设置正在进行项在最上面显示
                     lv_exam_pro_info.setSelection(i);
                     proStr = markingBean.getMarkProject();
-                    if(end != proStr){
-                        if(end != null){
+                    if (end != proStr) {
+                        if (end != null) {
                             postExamPro(end);
                             end = proStr;
                         }
-                    }else{
+                    } else {
 
                     }
                     getStartExamination(proStr);
@@ -1490,6 +1683,11 @@ public class ExamProcessActivity extends BaseActivity {
         }
     }
 
+    /**
+     * 播放语音
+     *
+     * @param name
+     */
     public void playMedia(String name) {
         try {
             AssetFileDescriptor fileDescriptor = getResources().getAssets().openFd(name + ".wav");
@@ -1509,12 +1707,38 @@ public class ExamProcessActivity extends BaseActivity {
         }
     }
 
-    /**
-     * 开启gps传输
-     */
-    public void startSocket() {
-        socketThread = new SocThread(m_rev_handler, m_sent_handler, ExamProcessActivity.this);
-        socketThread.start();
+    public class mapThread extends Thread {
+        @Override
+        public void run() {
+            super.run();
+            while (mapThreadBol) {
+                try {
+                    serverAddr = InetAddress.getByName(SERVER_IP);
+                    mapSocket = new Socket(serverAddr, SERVERPORT);
+                    mapSocket.setSoTimeout(200);
+                    input = new BufferedReader(new InputStreamReader(mapSocket.getInputStream()));
+                    if (input != null) {
+                        char[] buffer = new char[1024];
+                        int c = input.read(buffer, 0, 1024);
+                        if (c > 0) {
+                            String strMsg = new String(buffer, 0, c);
+                            if (strMsg == null) {
+
+                            } else {
+                                Message message = new Message();
+                                message.what = 2;
+                                message.obj = strMsg;
+                                mHandler.sendMessage(message);
+                            }
+                        }
+                    }
+                } catch (UnknownHostException e1) {
+
+                } catch (IOException e1) {
+
+                }
+            }
+        }
     }
 
     Handler m_rev_handler = new Handler() {

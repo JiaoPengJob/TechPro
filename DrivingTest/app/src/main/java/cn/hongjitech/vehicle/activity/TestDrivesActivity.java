@@ -203,9 +203,6 @@ public class TestDrivesActivity extends BaseActivity {
     private MarkingBean markingBean;//扣分信息
     private ExamDataUtil examDataUtil;//处理练一练数据工具类
 
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -218,7 +215,7 @@ public class TestDrivesActivity extends BaseActivity {
         serialPortThread = new SerialPortThread();
 
         try {
-            parsetoXWCJ = new ParsetoXWCJ(TestDrivesActivity.this);
+//            parsetoXWCJ = new ParsetoXWCJ(TestDrivesActivity.this);
             startSerialPortService();
         } catch (UnsatisfiedLinkError u) {
             Log.e("Error", u.toString());
@@ -230,9 +227,9 @@ public class TestDrivesActivity extends BaseActivity {
         //创建线程池,将费时操作放进线程池中
         executorService = Executors.newFixedThreadPool(1);
         executorService.execute(serialPortThread);
-
-        intMap();
-        initTcp();
+//
+//        intMap();
+//        initTcp();
 
     }
 
@@ -255,6 +252,7 @@ public class TestDrivesActivity extends BaseActivity {
         SerialPortSendUtil serialPortSendUtil = new SerialPortSendUtil();
         serialPortSendUtil.sendMessage(new byte[]{0x55, (byte) 0xAA, 0x01, 0x00, 0x00});
         stopService(SerialPortService.sIntent);
+        SharedPrefsUtils.clear(TestDrivesActivity.this);
     }
 
     /**
@@ -267,7 +265,7 @@ public class TestDrivesActivity extends BaseActivity {
             while (serialPortThreadFlag) {
                 try {
                     //延迟500毫秒接收数据
-                    Thread.sleep(500);
+                    Thread.sleep(50);
                     mHandler.sendEmptyMessage(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -285,9 +283,13 @@ public class TestDrivesActivity extends BaseActivity {
             super.handleMessage(msg);
             switch (msg.what) {
                 case 1:
+
+                    Log.e("Buffer", "喇叭:" + SharedPrefsUtils.getValue(TestDrivesActivity.this, "bf_speaker", ""));
+
                     tv_car_speed.setText(SharedPrefsUtils.getValue(TestDrivesActivity.this, "bf_speed", ""));//车速
                     tv_car_gear.setText(SharedPrefsUtils.getValue(TestDrivesActivity.this, "bf_gear_info", ""));//档位
-                    rpm.setText(SharedPrefsUtils.getValue(TestDrivesActivity.this,"bf_rpm","")+"r/min");//转速
+                    rpm.setText(SharedPrefsUtils.getValue(TestDrivesActivity.this, "bf_rpm", "") + "r/min");//转速
+
                     //点火1
                     if (SharedPrefsUtils.getValue(TestDrivesActivity.this, "bf_engine_status", "").equals("01")) {
                         iv_fire_one.setImageResource(R.drawable.oval_green);
@@ -312,6 +314,7 @@ public class TestDrivesActivity extends BaseActivity {
                     //喇叭
                     if (SharedPrefsUtils.getValue(TestDrivesActivity.this, "bf_speaker", "").equals("C1")) {
                         iv_speaker.setImageResource(R.drawable.oval_green);
+                        Log.e("Buffer","喇叭点亮");
                     } else {
                         iv_speaker.setImageResource(R.drawable.oval_gray);
                     }
@@ -437,7 +440,7 @@ public class TestDrivesActivity extends BaseActivity {
                     tv_ultrasonic_two.setText(SharedPrefsUtils.getValue(TestDrivesActivity.this, "bf_ultrasonic_2", ""));
 
 //                    if (tag == 1) {
-                        parsetoXWCJ.getXWCJ();
+//                        parsetoXWCJ.getXWCJ();
 //                    }
 //                    Log.d("TAG","点火---"+SharedPrefsUtils.getValue(TestDrivesActivity.this, "bf_engine_status", "")+"");
                     //判断是否在点火前
@@ -465,7 +468,7 @@ public class TestDrivesActivity extends BaseActivity {
                             tag = 1;
 //                                Log.d("TAG=====","进入");
 //                                Toast.makeText(TestDrivesActivity.this, "进入...", Toast.LENGTH_SHORT).show();
-                            parsetoXWCJ.getXWCJ();
+//                            parsetoXWCJ.getXWCJ();
                         } else {
 //                            Toast.makeText(TestDrivesActivity.this, "进行扣分...", Toast.LENGTH_SHORT).show();
 //                            fraction = 10;
@@ -505,6 +508,7 @@ public class TestDrivesActivity extends BaseActivity {
                     showDialogForExamOver();
                     break;
                 case R.id.iv_testDrives_gameOver://结束
+                    stopSerialPort();
                     intent = new Intent(TestDrivesActivity.this, MainActivity.class);
                     startActivity(intent);
                     TestDrivesActivity.this.finish();
@@ -512,13 +516,13 @@ public class TestDrivesActivity extends BaseActivity {
                 case R.id.iv_test_drives_map://地图小按钮
                     iv_test_drives_map.setImageResource(R.drawable.map_check);
                     iv_test_drives_single.setImageResource(R.drawable.single_no_check);
-                    my_layout.setVisibility(View.VISIBLE);
+//                    my_layout.setVisibility(View.VISIBLE);
                     ll_single_parent.setVisibility(View.GONE);
                     break;
                 case R.id.iv_test_drives_single://地图信号小按钮
                     iv_test_drives_map.setImageResource(R.drawable.map_no_check);
                     iv_test_drives_single.setImageResource(R.drawable.single_check);
-                    my_layout.setVisibility(View.GONE);
+//                    my_layout.setVisibility(View.GONE);
                     ll_single_parent.setVisibility(View.VISIBLE);
                     break;
                 case R.id.et_dialog_pwd://口令输入框--dialog
@@ -642,7 +646,7 @@ public class TestDrivesActivity extends BaseActivity {
     Handler handelr = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
-            Log.d("Tag","Handler进入");
+            Log.d("Tag", "Handler进入");
             String result = msg.obj.toString();
             getXWYD2(result);
             getEXAM(result);
@@ -664,14 +668,14 @@ public class TestDrivesActivity extends BaseActivity {
             if (str.equals("$EXAM")) {
                 markingBean = examDataUtil.getExamData(strMsg);
                 if (markingBean != null) {
-                    if(markingBean.getMarkProject() != null){
-                        tvPro.setText("PRO--"+markingBean.getMarkProject());
+                    if (markingBean.getMarkProject() != null) {
+                        tvPro.setText("PRO--" + markingBean.getMarkProject());
                     }
-                    if(markingBean.getMarkFraction() != null){
-                        tvFuc.setText("fAC"+markingBean.getMarkFraction());
+                    if (markingBean.getMarkFraction() != null) {
+                        tvFuc.setText("fAC" + markingBean.getMarkFraction());
                     }
-                    if(markingBean.getMarkRes() != null){
-                        tvCon.setText("RES"+markingBean.getMarkRes());
+                    if (markingBean.getMarkRes() != null) {
+                        tvCon.setText("RES" + markingBean.getMarkRes());
                     }
                 } else {
                     Log.e("TAG", "扣分对象为空!");

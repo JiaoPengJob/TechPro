@@ -23,7 +23,7 @@ public class ParsetoXWCJ {
 
     public ParsetoXWCJ(Context context) {
         this.context = context;
-//        xgydSerialPortSendUtil = new XGYDSerialPortSendUtil();
+        xgydSerialPortSendUtil = new XGYDSerialPortSendUtil();
     }
 
     public String getXWCJ() {
@@ -147,12 +147,11 @@ public class ParsetoXWCJ {
                 .append(yuanguang + ",")
                 .append(jinguang + ",")
                 .append(wudeng + "*FF");
-//                .append(wudeng + "*" + getCode(sb.toString()));
 
-//        Log.e("TAGUU", sb.toString());
-        xgydSerialPortSendUtil = new XGYDSerialPortSendUtil();
         if (sb != null) {
-//            tp.sendMsgToTcp(sb.toString());
+            if(xgydSerialPortSendUtil == null){
+                xgydSerialPortSendUtil = new XGYDSerialPortSendUtil();
+            }
             xgydSerialPortSendUtil.sendMessage(sb.toString().getBytes());
         }
         return null;

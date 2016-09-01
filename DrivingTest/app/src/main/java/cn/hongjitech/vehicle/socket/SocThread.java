@@ -39,7 +39,7 @@ public class SocThread extends Thread {
         inHandler = handlerin;
         outHandler = handlerout;
         ctx = context;
-        MyLog.i(TAG, "创建线程socket");
+//        MyLog.i(TAG, "创建线程socket");
     }
 
     /**
@@ -49,24 +49,24 @@ public class SocThread extends Thread {
 
         try {
             initdate();
-            Log.i(TAG, "连接中⋯⋯");
+//            Log.i(TAG, "连接中⋯⋯");
             client = new Socket(ip, port);
             client.setSoTimeout(timeout);// 设置阻塞时间
-            MyLog.i(TAG, "连接成功");
+//            MyLog.i(TAG, "连接成功");
             in = new BufferedReader(new InputStreamReader(
                     client.getInputStream()));
             out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(
                     client.getOutputStream())), true);
-            MyLog.i(TAG, "输入输出流获取成功");
+//            MyLog.i(TAG, "输入输出流获取成功");
         } catch (UnknownHostException e) {
-            MyLog.i(TAG, "连接错误UnknownHostException 重新获取");
+//            MyLog.i(TAG, "连接错误UnknownHostException 重新获取");
             e.printStackTrace();
             conn();
         } catch (IOException e) {
-            MyLog.i(TAG, "连接服务器io错误");
+//            MyLog.i(TAG, "连接服务器io错误");
             e.printStackTrace();
         } catch (Exception e) {
-            MyLog.i(TAG, "连接服务器错误Exception" + e.getMessage());
+//            MyLog.i(TAG, "连接服务器错误Exception" + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -75,7 +75,7 @@ public class SocThread extends Thread {
         sp = ctx.getSharedPreferences("SP", ctx.MODE_PRIVATE);
         ip = sp.getString("ipstr", ip);
         port = Integer.parseInt(sp.getString("port", String.valueOf(port)));
-        MyLog.i(TAG, "获取到ip端口:" + ip + ";" + port);
+//        MyLog.i(TAG, "获取到ip端口:" + ip + ";" + port);
     }
 
     /**
@@ -83,29 +83,29 @@ public class SocThread extends Thread {
      */
     @Override
     public void run() {
-        MyLog.i(TAG, "线程socket开始运行");
+//        MyLog.i(TAG, "线程socket开始运行");
         conn();
-        MyLog.i(TAG, "1.run开始");
+//        MyLog.i(TAG, "1.run开始");
         String line = "";
         while (isRun) {
             try {
                 if (client != null) {
-                    MyLog.i(TAG, "2.检测数据");
+//                    MyLog.i(TAG, "2.检测数据");
                     while ((line = in.readLine()) != null) {
-                        MyLog.i(TAG, "3.getdata" + line + " len=" + line.length());
-                        MyLog.i(TAG, "4.start set Message");
+//                        MyLog.i(TAG, "3.getdata" + line + " len=" + line.length());
+//                        MyLog.i(TAG, "4.start set Message");
                         Message msg = inHandler.obtainMessage();
                         msg.obj = line;
                         inHandler.sendMessage(msg);// 结果返回给UI处理
-                        MyLog.i(TAG1, "5.send to handler");
+//                        MyLog.i(TAG1, "5.send to handler");
                     }
 
                 } else {
-                    MyLog.i(TAG, "没有可用连接");
+//                    MyLog.i(TAG, "没有可用连接");
                     conn();
                 }
             } catch (Exception e) {
-                MyLog.i(TAG, "数据接收错误" + e.getMessage());
+//                MyLog.i(TAG, "数据接收错误" + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -119,9 +119,9 @@ public class SocThread extends Thread {
     public void Send(String mess) {
         try {
             if (client != null) {
-                MyLog.i(TAG1, "发送" + mess + "至"
-                        + client.getInetAddress().getHostAddress() + ":"
-                        + String.valueOf(client.getPort()));
+//                MyLog.i(TAG1, "发送" + mess + "至"
+//                        + client.getInetAddress().getHostAddress() + ":"
+//                        + String.valueOf(client.getPort()));
                 out.println(mess);
                 out.flush();
                 MyLog.i(TAG1, "发送成功");
@@ -130,21 +130,20 @@ public class SocThread extends Thread {
                 msg.what = 1;
                 outHandler.sendMessage(msg);// 结果返回给UI处理
             } else {
-                MyLog.i(TAG, "client 不存在");
+//                MyLog.i(TAG, "client 不存在");
                 Message msg = outHandler.obtainMessage();
                 msg.obj = mess;
                 msg.what = 0;
                 outHandler.sendMessage(msg);// 结果返回给UI处理
-                MyLog.i(TAG, "连接不存在重新连接");
+//                MyLog.i(TAG, "连接不存在重新连接");
                 conn();
             }
 
         } catch (Exception e) {
-            MyLog.i(TAG1, "send error");
+//            MyLog.i(TAG1, "send error");
             e.printStackTrace();
         } finally {
             MyLog.i(TAG1, "发送完毕");
-
         }
     }
 
@@ -154,11 +153,11 @@ public class SocThread extends Thread {
     public void close() {
         try {
             if (client != null) {
-                MyLog.i(TAG, "close in");
+//                MyLog.i(TAG, "close in");
                 in.close();
-                MyLog.i(TAG, "close out");
+//                MyLog.i(TAG, "close out");
                 out.close();
-                MyLog.i(TAG, "close client");
+//                MyLog.i(TAG, "close client");
                 client.close();
             }
         } catch (Exception e) {

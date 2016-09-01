@@ -19,6 +19,7 @@ import butterknife.InjectView;
 import cn.hongjitech.vehicle.R;
 import cn.hongjitech.vehicle.adapter.ArtificialCodeAdapter;
 import cn.hongjitech.vehicle.bean.ArtificialCode;
+import cn.hongjitech.vehicle.initTestData.ArtificialCodeData;
 
 /**
  * 扣分代码             //192.168.41.254
@@ -57,9 +58,8 @@ public class ArtificialPointsCodeDialogActivity extends BaseActivity {
      */
     private void initData() {
         list = new ArrayList<ArtificialCode>();
-        for (int i = 0; i < 19; i++) {
-            list.add(new ArtificialCode("1000" + i, "内容" + i, "100"));
-        }
+        ArtificialCodeData acd = new ArtificialCodeData();
+        list = acd.getData();
         artificialCodeAdapter = new ArtificialCodeAdapter(ArtificialPointsCodeDialogActivity.this, list);
         lv_dialog_artCode_info.setAdapter(artificialCodeAdapter);
     }

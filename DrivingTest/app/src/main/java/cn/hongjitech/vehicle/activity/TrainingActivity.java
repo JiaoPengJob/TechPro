@@ -128,7 +128,7 @@ public class TrainingActivity extends BaseActivity {
     private static final int SVID = 6997;
     private static final int SPID = 288;
     private boolean bstart = false;
-    private boolean isRegister = false;
+    private boolean isRegister = true;
     private int uid = 1;
     private byte[][] regtemparray = new byte[3][2048];  //register template buffer array
     private int enrollidx = 0;
@@ -626,20 +626,19 @@ public class TrainingActivity extends BaseActivity {
                                 LogHelper.i("width=" + fingerprintSensor.getImageWidth() + "\nHeight=" + fingerprintSensor.getImageHeight());
                                 //获取到指纹
                                 Bitmap bitmapFp = ToolUtils.renderCroppedGreyScaleBitmap(fpImage, fingerprintSensor.getImageWidth(), fingerprintSensor.getImageHeight());
-                                if (bitmapFp != null && fingerResults != null) {
-                                    //将采集到的指纹与系统保存的指纹进行比对
-                                    int verifyResult = ZKFingerService.verify(StringUtils.bitmapToByte(bitmapFp, Bitmap.CompressFormat.PNG), fingerResults[0].getBytes());
-                                    Log.e("TAG", fingerprintSensor.getImageWidth() + "/verifyResult--" + verifyResult);
-//                                    int verifyResultNext = ZKFingerService.verify(StringUtils.bitmapToByte(bitmapFp, Bitmap.CompressFormat.PNG), fingerResults[1].getBytes());
-                                    if (verifyResult < -23) {
-                                        Log.e("TAG", "jinru");
-                                        iv_train_rcp_fingerprint.setImageResource(R.drawable.green_cirle);
-                                    } else {
-                                        iv_train_rcp_fingerprint.setImageResource(R.drawable.red_cirle);
-                                    }
-                                } else {
-                                    Log.e("Error", "指纹图片校验失败!");
-                                }
+//                                if (bitmapFp != null && fingerResults != null) {
+//                                    //将采集到的指纹与系统保存的指纹进行比对
+//                                    int verifyResult = ZKFingerService.verify(StringUtils.bitmapToByte(bitmapFp, Bitmap.CompressFormat.PNG), fingerResults[0].getBytes());
+//                                    Log.e("TAG", fingerprintSensor.getImageWidth() + "/verifyResult--" + verifyResult);
+////                                    int verifyResultNext = ZKFingerService.verify(StringUtils.bitmapToByte(bitmapFp, Bitmap.CompressFormat.PNG), fingerResults[1].getBytes());
+//                                    if (verifyResult < 23) {
+//                                        iv_train_rcp_fingerprint.setImageResource(R.drawable.green_cirle);
+//                                    } else {
+//                                        iv_train_rcp_fingerprint.setImageResource(R.drawable.red_cirle);
+//                                    }
+//                                } else {
+//                                    Log.e("Error", "指纹图片校验失败!");
+//                                }
                             }
                         }
                     });
@@ -678,25 +677,36 @@ public class TrainingActivity extends BaseActivity {
                                 int ret = ZKFingerService.identify(tmpBuffer, bufids, 55, 1);
                                 if (ret > 0) {
                                     String strRes[] = new String(bufids).split("\t");
-                                    Log.d("Fingerprint Message", "the finger already enroll by " + strRes[0] + ",cancel enroll");
                                     isRegister = false;
                                     enrollidx = 0;
                                     return;
                                 }
                                 if (enrollidx > 0 && ZKFingerService.verify(regtemparray[enrollidx - 1], tmpBuffer) <= 0) {
-                                    Log.d("Fingerprint Message", "please press the same finger 3 times for the enrollment");
                                     return;
                                 }
                                 System.arraycopy(tmpBuffer, 0, regtemparray[enrollidx], 0, 2048);
+                                //指纹次数设置
                                 enrollidx++;
-                                if (enrollidx == 3) {
+                                if (enrollidx == 1) {
                                     byte[] regTemp = new byte[2048];
                                     if (0 < (ret = ZKFingerService.merge(regtemparray[0], regtemparray[1], regtemparray[2], regTemp))) {
                                         ZKFingerService.save(regTemp, "test" + uid++);
                                         System.arraycopy(regTemp, 0, lastRegTemp, 0, ret);
-                                        //Base64 Template
+                                        //Base64 Template获取到的指纹数据Base64
                                         String strBase64 = Base64.encodeToString(regTemp, 0, ret, Base64.NO_WRAP);
-                                        Log.d("Fingerprint Message", "enroll succ");
+                                        if (strBase64 != null && fingerResults != null) {
+                                            //将采集到的指纹与系统保存的指纹进行比对
+                                            int verifyResult = ZKFingerService.verify(strBase64.getBytes(), fingerResults[0].getBytes());
+                                            Log.e("Fingerprint", fingerprintSensor.getImageWidth() + "/verifyResult--" + verifyResult);
+                                            if (verifyResult > 23) {
+                                                iv_train_rcp_fingerprint.setImageResource(R.drawable.green_cirle);
+                                            } else {
+                                                iv_train_rcp_fingerprint.setImageResource(R.drawable.red_cirle);
+                                            }
+                                        } else {
+                                            Log.e("Error", "指纹图片校验失败!");
+                                        }
+                                        Log.e("Fingerprint","strBase64"+strBase64);
                                     } else {
                                         Log.e("Fingerprint Message", "enroll fail");
                                     }

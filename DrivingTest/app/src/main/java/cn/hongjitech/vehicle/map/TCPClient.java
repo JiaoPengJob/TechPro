@@ -57,19 +57,12 @@ public class TCPClient implements Runnable {
         }
     }
 
-    public void getTCPIP() {
-        File sd = Environment.getExternalStorageDirectory();
-        String filePath = sd.getPath() + "/Training/TCP.txt";
-        readTxtFile(filePath);
-    }
-
     private void iniTCPClient() {
         try {
             if (nConnectCount == -1 || nConnectCount > 0.2 * 60 * 1000 / 50) {
                 this.tcpConnecting();
                 nConnectCount = 0;
             }
-//            getTCPIP();
             if (SERVER_IP == "") {
 //                SERVER_IP = "192.168.41.254";
 //                SERVER_IP = "10.10.100.254";
@@ -81,7 +74,6 @@ public class TCPClient implements Runnable {
             socket.setSoTimeout(300);
             input = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
             bConnect = true;
-//            sendMessage("$xwtcp,set,exam_mode_training*ff");
         } catch (UnknownHostException e1) {
             bConnect = false;
             e1.printStackTrace();
@@ -104,7 +96,6 @@ public class TCPClient implements Runnable {
             out.write(strMsg.getBytes());
             out.flush();
             bresult = true;
-//            Log.d("TAG","成功发送开始命令");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -120,11 +111,9 @@ public class TCPClient implements Runnable {
         int n = 0;
         while (!Thread.currentThread().isInterrupted()) {
             if (true) {
-                //ndur = 50;
                 //自动连接
                 if (bConnect == false) {
                     iniTCPClient();
-//                    sendMessage("$xwtcp,set,exam_mode_training*ff");
                     nConnectCount++;
                 }
                 n = 0;
@@ -152,28 +141,6 @@ public class TCPClient implements Runnable {
 
     }
 
-    private void readDatabyTCP1() {
-        try {
-            if (input != null) {
-                String read = input.readLine();
-                if (read == null) {
-                } else {
-                    //updatetrack(read, 1);
-                    bConnect = true;
-                }
-            }
-        } catch (IOException e) {
-            bConnect = false;
-            Log.w("train", "TcpClient tcp close IOException");
-            e.printStackTrace();
-        }
-
-        if (bConnect == false) {
-            this.tcpDisConnect();
-        }
-
-    }
-
     private void readDatabyTCP() {
         try {
             if (input != null) {
@@ -184,17 +151,14 @@ public class TCPClient implements Runnable {
                     if (strMsg == null) {
                     } else {
                         if (bReciveData) {
-                            //updatetrack(read, 1);
                             postMsgToEventBus(strMsg, 1);
                         }
                         bConnect = true;
                     }
                 }
-
             }
         } catch (IOException e) {
             bConnect = false;
-            Log.w("train", "TcpClient tcp close IOException");
             e.printStackTrace();
         }
         if (bConnect == false) {
@@ -207,7 +171,6 @@ public class TCPClient implements Runnable {
         TcpMessage msg = new TcpMessage();
         msg.nType = nType;
         msg.strMsg = strMsg;
-//        System.out.println("postMsgToEventBus" + strMsg);
         EventBus.getDefault().post(msg);
     }
 

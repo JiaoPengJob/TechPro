@@ -30,13 +30,11 @@ public class SerialPortService extends Service {
 
     @Override
     public void onCreate() {
-        Log.d("service", "onCreate");
         super.onCreate();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("service", "onStartCommand");
         sIntent = intent;
         open();
         return super.onStartCommand(intent, flags, startId);
@@ -44,7 +42,6 @@ public class SerialPortService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.d("service", "onDestroy");
         super.onDestroy();
         isPlaying = false;
     }
@@ -57,7 +54,6 @@ public class SerialPortService extends Service {
 
     private void open() {
         try {
-            Log.d("service", "open");
             mSerialPort = new SerialPort(new File("/dev/ttyAMA2"), 9600, 0);
             mInputStream = mSerialPort.getInputStream();
             thread = new SThread();
@@ -92,8 +88,8 @@ public class SerialPortService extends Service {
                             mInputStream.read(buffer, 0, i);
                             continue;
                         }
-//                        SharedPrefsUtils.clear(SerialPortService.this);
                         BufferHelper.commitBuffer(SerialPortService.this, buffer);
+//                        Log.e("Buffer","SeriaplPortService:--"+buffer.toString());
                     }
                 } catch (Throwable e) {
                     e.printStackTrace();
