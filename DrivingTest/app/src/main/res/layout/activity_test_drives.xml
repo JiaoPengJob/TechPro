@@ -25,501 +25,446 @@
         <TableRow>
 
             <LinearLayout
-                android:layout_width="515dp"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_width="300dp"
+                android:layout_height="550dp"
+                android:gravity="center"
+                android:background="@color/greay"
+                android:orientation="horizontal">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/border"
+                    android:gravity="center_vertical"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/height_38"
-                        android:background="@color/blue"
-                        android:gravity="center_vertical"
-                        android:paddingLeft="13dp"
-                        android:text="@string/exam_info"
-                        android:textColor="@color/greay"
-                        android:textSize="@dimen/font_18" />
-
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:padding="5dp">
-
-                        <RelativeLayout
-                            android:layout_width="@dimen/height_125"
-                            android:layout_height="@dimen/height_160"
-                            android:layout_marginLeft="3dp"
-                            android:background="@drawable/border">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:scaleType="fitXY"
-                                android:src="@drawable/train_photo" />
-
-                        </RelativeLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginTop="5dp"
-                            android:orientation="horizontal">
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical">
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal"
-
-                                    >
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="@string/train_name"
-                                        android:textColor="@color/content"
-                                        android:textSize="@dimen/font_16" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginLeft="2dp"
-                                        android:textColor="@color/content"
-                                        android:textSize="@dimen/font_16" />
-
-                                </LinearLayout>
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="40dp"
-                                    android:orientation="horizontal">
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="@string/exam_time_begin"
-                                        android:textColor="@color/content"
-                                        android:textSize="@dimen/font_16" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginLeft="2dp"
-                                        android:textColor="@color/content"
-                                        android:textSize="@dimen/font_16" />
-
-                                </LinearLayout>
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="40dp"
-                                    android:orientation="horizontal">
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="@string/exam_score_count"
-                                        android:textColor="@color/content"
-                                        android:textSize="@dimen/font_16" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginLeft="2dp"
-                                        android:text="0"
-                                        android:textColor="@color/red_exam"
-                                        android:textSize="@dimen/font_16" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="次"
-                                        android:textColor="@color/content"
-                                        android:textSize="@dimen/font_16" />
-
-                                </LinearLayout>
-
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="20dp"
-                                android:orientation="vertical">
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal">
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="@string/train_code"
-                                        android:textColor="@color/content"
-                                        android:textSize="@dimen/font_16" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginLeft="2dp"
-                                        android:textColor="@color/content"
-                                        android:textSize="@dimen/font_16" />
-
-                                </LinearLayout>
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="40dp"
-                                    android:orientation="horizontal">
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="用         时:"
-                                        android:textColor="@color/content"
-                                        android:textSize="@dimen/font_16" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginLeft="2dp"
-                                        android:textColor="@color/content"
-                                        android:textSize="@dimen/font_16" />
-
-                                </LinearLayout>
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="40dp"
-                                    android:orientation="horizontal">
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="@string/exam_long"
-                                        android:textColor="@color/content"
-                                        android:textSize="@dimen/font_16" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginLeft="2dp"
-                                        android:text="0m"
-                                        android:textColor="@color/content"
-                                        android:textSize="@dimen/font_16" />
-
-                                </LinearLayout>
-
-                            </LinearLayout>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/border"
-                    android:orientation="vertical">
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/height_38"
-                        android:background="@color/blue"
-                        android:gravity="center_vertical">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:paddingLeft="13dp"
-                                android:text="@string/exam_line_list"
-                                android:textColor="@color/greay"
-                                android:textSize="@dimen/font_18" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="线路一"
-                                android:textColor="@color/greay"
-                                android:textSize="@dimen/font_18" />
-
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
-                            android:layout_marginRight="10dp"
-                            android:text="00:00:00"
-                            android:textColor="@color/greay"
-                            android:textSize="@dimen/font_18" />
-
-                    </RelativeLayout>
-
-                    <ListView
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp"
-                        android:divider="@android:color/darker_gray"
-                        android:listSelector="@android:color/transparent"
-                        android:visibility="gone"
-                        ></ListView>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp"
-                        android:orientation="vertical"
-                        android:layout_marginTop="5dp"
-                        >
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            >
-
-                            <TextView
-                                android:id="@+id/tvPro"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Pro"
-                                />
-                            <TextView
-                                android:id="@+id/tvFuc"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="20dp"
-                                android:text="Fac"
-                                />
-
-                            <TextView
-                                android:id="@+id/tvCon"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="20dp"
-                                android:text="Res"
-                                />
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginTop="5dp"
-                            >
-
-                            <TextView
-                                android:id="@+id/tvLa"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="La"
-                                />
-                            <TextView
-                                android:id="@+id/tvLo"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="20dp"
-                                android:text="Lo"
-                                />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/height_34"
-                    android:background="@color/greny_cc"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/height_34"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/exam_stop_time"
-                            android:textColor="@color/greay"
-                            android:textSize="@dimen/font_16" />
-
-                        <TextView
-                            android:layout_width="30dp"
-                            android:layout_height="wrap_content"
-                            android:text="2s"
-                            android:textColor="@color/greay"
-                            android:textSize="@dimen/font_16" />
-                    </LinearLayout>
-
-                    <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:src="@drawable/line" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/height_34"
-                        android:layout_marginLeft="10dp"
-                        android:gravity="center"
                         android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/exam_stop_speed"
-                            android:textColor="@color/greay"
                             android:textSize="@dimen/font_16" />
 
                         <TextView
                             android:id="@+id/tv_car_speed"
                             android:layout_width="75dp"
                             android:layout_height="wrap_content"
-                            android:text="400km/h"
-                            android:textColor="@color/greay"
                             android:textSize="@dimen/font_16" />
                     </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:src="@drawable/line" />
-
                     <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="@dimen/height_34"
-                        android:layout_marginLeft="10dp"
-                        android:gravity="center"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
                         android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="转速:"
-                            android:textColor="@color/greay"
                             android:textSize="@dimen/font_16" />
 
                         <TextView
                             android:id="@+id/rpm"
                             android:layout_width="90dp"
                             android:layout_height="wrap_content"
-                            android:text="1000r/min"
-                            android:textColor="@color/greay"
                             android:textSize="@dimen/font_16" />
                     </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:src="@drawable/line" />
-
                     <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="@dimen/height_34"
-                        android:layout_marginLeft="10dp"
-                        android:gravity="center"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
                         android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/exam_stop_stall"
-                            android:textColor="@color/greay"
                             android:textSize="@dimen/font_16" />
 
                         <TextView
                             android:id="@+id/tv_car_gear"
-                            android:layout_width="20dp"
+                            android:layout_width="90dp"
                             android:layout_height="wrap_content"
-                            android:text="2"
-                            android:textColor="@color/greay"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="点火状态:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_fire"
+                            android:layout_width="75dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="雨刮:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_yugua"
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="喇叭:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_laba"
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="制动器:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_zhidongqi"
+                            android:layout_width="75dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="车门:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_door"
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="安全带:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_anquandai"
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="离合:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_lihe"
+                            android:layout_width="75dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="雾灯:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_wudeng"
+                            android:layout_width="75dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:layout_marginLeft="30dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="报警灯:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_baojingdeng"
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="手刹:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_shousha"
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="示宽灯:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_shikuandeng"
+                            android:layout_width="75dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="副刹车:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_fushache"
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="左转灯:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_zuozhunadeng"
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="外后视镜:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_waihoushijing"
+                            android:layout_width="75dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="右转灯:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/youzhuandeng"
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="中央后视镜:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_zhongyang"
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="近光灯:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_jinguangdeng"
+                            android:layout_width="75dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="远光灯:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_yuanguangdeng"
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/font_16" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="座椅调整:"
+                            android:textSize="@dimen/font_16" />
+
+                        <TextView
+                            android:id="@+id/tv_zuoyi"
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
                             android:textSize="@dimen/font_16" />
                     </LinearLayout>
 
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:background="@drawable/border"
-                    android:orientation="vertical">
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/height_38"
-                        android:background="@color/blue">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentLeft="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginLeft="30dp"
-                            android:text="@string/exam_mark_pro"
-                            android:textColor="@color/greay"
-                            android:textSize="@dimen/font_18" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerInParent="true"
-                            android:text="@string/exam_marking"
-                            android:textColor="@color/greay"
-                            android:textSize="@dimen/font_18" />
-
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginRight="45dp"
-                            android:text="@string/exam_mark_res"
-                            android:textColor="@color/greay"
-                            android:textSize="@dimen/font_18" />
-
-                    </RelativeLayout>
-
-                    <ListView
-                        android:layout_width="match_parent"
-                        android:layout_height="115dp"
-                        android:divider="@android:color/darker_gray"
-                        android:listSelector="@android:color/transparent"></ListView>
-
-                </LinearLayout>
-
             </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="450dp"
@@ -532,76 +477,9 @@
                     android:layout_height="550dp"
                     android:background="@drawable/border">
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_marginRight="24dp"
-                        android:layout_marginTop="10dp"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:id="@+id/iv_test_drives_map"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/map_check" />
-
-                        <ImageView
-                            android:id="@+id/iv_test_drives_single"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/single_no_check" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/root"
-                        android:layout_width="fill_parent"
-                        android:layout_height="550dp"
-                        android:orientation="vertical"></LinearLayout>
-
-                    <ImageView
-                        android:id="@+id/max"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="10dp"
-                        android:src="@drawable/max_map" />
-
-                    <ImageView
-                        android:id="@+id/min"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_toRightOf="@id/max"
-                        android:src="@drawable/min_map" />
-
                     <include layout="@layout/single"></include>
 
                 </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:id="@+id/iv_testDrives_gameOver"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:scaleType="fitXY"
-                        android:src="@drawable/exam_over" />
-
-                    <ImageView
-                        android:id="@+id/bt_testDrives_dataHandle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="50dp"
-                        android:src="@drawable/pwd_data" />
-
-                </LinearLayout>
 
             </LinearLayout>
 

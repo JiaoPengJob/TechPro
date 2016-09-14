@@ -96,7 +96,7 @@ public class MainActivity extends BaseActivity {
                     MainActivity.this.finish();
                     break;
                 case R.id.iv_main_test://测试
-                    intent = new Intent(MainActivity.this, TestDrivesActivity.class);
+                    intent = new Intent(MainActivity.this, TestActivity.class);
                     startActivity(intent);
                     MainActivity.this.finish();
                     break;

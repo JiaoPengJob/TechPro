@@ -35,6 +35,7 @@ import cn.hongjitech.vehicle.javaBean.InitializationRoot;
 import cn.hongjitech.vehicle.javaBean.StudentInfo;
 import cn.hongjitech.vehicle.javaBean.StudentInfoRoot;
 import cn.hongjitech.vehicle.javaBean.User;
+import cn.hongjitech.vehicle.parameter.BParameter;
 import cn.hongjitech.vehicle.util.FilesUtil;
 import cn.hongjitech.vehicle.util.SharedPrefsUtils;
 import cn.hongjitech.vehicle.util.StringUtils;
@@ -177,6 +178,8 @@ public class StuApproveActivity extends BaseActivity {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.iv_approve_begin_exam://开始考试
+                    //设置开始扣分判断
+                    BParameter.ifStart = true;
                     if (user != null && !endTime.equals("")) {
                         sendImgUrl();
                     } else {

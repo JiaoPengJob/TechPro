@@ -2,35 +2,24 @@ package cn.hongjitech.vehicle.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
-import android.widget.ImageView;
-import android.widget.ListView;
-
-import java.util.ArrayList;
-import java.util.List;
+import android.widget.Button;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import cn.hongjitech.vehicle.R;
-import cn.hongjitech.vehicle.adapter.MarkingAdapter;
-import cn.hongjitech.vehicle.bean.MarkingBean;
 
 public class TestActivity extends BaseActivity {
 
-    @InjectView(R.id.lv_test_info)
-    ListView lv_test_info;//扣分列表信息
-    @InjectView(R.id.iv_test_face)
-    ImageView iv_test_face;//成功与否的表情图片
-    @InjectView(R.id.iv_test_makeup)
-    ImageView iv_test_makeup;//补考
-    @InjectView(R.id.iv_test_over)
-    ImageView iv_test_over;//结束
+    @InjectView(R.id.bt_carInfoTest)
+    Button bt_carInfoTest;
+    @InjectView(R.id.bt_serialportTest)
+    Button bt_serialportTest;
+    @InjectView(R.id.bt_examInfoTest)
+    Button bt_examInfoTest;
 
-    /*----------------------------------*/
-    private List<MarkingBean> markingBeens;
-    private Intent intent;//跳转Intent对象
+    private Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,28 +28,15 @@ public class TestActivity extends BaseActivity {
         setContentView(R.layout.activity_test);
         ButterKnife.inject(TestActivity.this);
         initListener();
-        initData();
-    }
-
-    /**
-     * 加载列表数据
-     */
-    private void initData() {
-
-        markingBeens = new ArrayList<MarkingBean>();
-        for (int i = 0; i < 3; i++) {
-            markingBeens.add(new MarkingBean("起步" + i, "1" + i, "操作不当发动机熄火" + i,null,null));
-        }
-        lv_test_info.setAdapter(new MarkingAdapter(TestActivity.this, markingBeens));
-
     }
 
     /**
      * 加载点击事件监听函数
      */
     private void initListener() {
-        iv_test_makeup.setOnClickListener(new ClickListener());
-        iv_test_over.setOnClickListener(new ClickListener());
+        bt_carInfoTest.setOnClickListener(new ClickListener());
+        bt_serialportTest.setOnClickListener(new ClickListener());
+        bt_examInfoTest.setOnClickListener(new ClickListener());
     }
 
     /**
@@ -70,15 +46,16 @@ public class TestActivity extends BaseActivity {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.iv_test_makeup://补考
-                    intent = new Intent(TestActivity.this, ExamProcessActivity.class);
+                case R.id.bt_carInfoTest:
+                    intent = new Intent(TestActivity.this, CarDataActivity.class);
                     startActivity(intent);
-                    TestActivity.this.finish();
                     break;
-                case R.id.iv_test_over://结束
-                    intent = new Intent(TestActivity.this, StuApproveActivity.class);
+                case R.id.bt_serialportTest:
+                    intent = new Intent(TestActivity.this, TestDrivesActivity.class);
                     startActivity(intent);
-                    TestActivity.this.finish();
+                    break;
+                case R.id.bt_examInfoTest:
+
                     break;
             }
         }

@@ -61,10 +61,12 @@ import cn.hongjitech.vehicle.javaBean.GPSBeanRoot;
 import cn.hongjitech.vehicle.javaBean.InitializationRoot;
 import cn.hongjitech.vehicle.javaBean.SerialPortBean;
 import cn.hongjitech.vehicle.javaBean.User;
+import cn.hongjitech.vehicle.judgment.BJudgment;
 import cn.hongjitech.vehicle.map.TCPClient;
 import cn.hongjitech.vehicle.map.TcpMessage;
 import cn.hongjitech.vehicle.map.TcpPresenter;
 import cn.hongjitech.vehicle.map.tcpConnectState;
+import cn.hongjitech.vehicle.parameter.BParameter;
 import cn.hongjitech.vehicle.service.SerialPortService;
 import cn.hongjitech.vehicle.socket.MyLog;
 import cn.hongjitech.vehicle.socket.SocThread;
@@ -287,14 +289,14 @@ public class ExamProcessActivity extends BaseActivity {
     /**
      * 开启串口数据接收
      */
-    private void startSerialPortService() {
-        //向串口发送开启命令
-        SerialPortSendUtil serialPortSendUtil = new SerialPortSendUtil();
-        serialPortSendUtil.sendMessage(new byte[]{0x55, (byte) 0xAA, 0x01, 0x01, 0x01});
-        //打开串口数据接收服务
-        intent = new Intent(ExamProcessActivity.this, SerialPortService.class);
-        startService(intent);
-    }
+//    private void startSerialPortService() {
+//        //向串口发送开启命令
+//        SerialPortSendUtil serialPortSendUtil = new SerialPortSendUtil();
+//        serialPortSendUtil.sendMessage(new byte[]{0x55, (byte) 0xAA, 0x01, 0x01, 0x01});
+//        //打开串口数据接收服务
+//        intent = new Intent(ExamProcessActivity.this, SerialPortService.class);
+//        startService(intent);
+//    }
 
     /**
      * 加载用户数据
@@ -310,6 +312,8 @@ public class ExamProcessActivity extends BaseActivity {
         serialPortThreadFlag = true;
         mp = new MediaPlayer();
         intMap();
+
+        sendMessageToCar();
 //        initTcp();
         examDataUtil = new ExamDataUtil(ExamProcessActivity.this);
         gson = new GsonBuilder().enableComplexMapKeySerialization().create();
@@ -464,7 +468,6 @@ public class ExamProcessActivity extends BaseActivity {
                     startActivity(intent);
                     ExamProcessActivity.this.finish();
                     exitThread();
-                    EventBus.getDefault().unregister(this);
                     break;
                 case R.id.iv_exam_right_map://地图上地图按钮
                     iv_exam_right_map.setImageResource(R.drawable.map_check);
@@ -589,14 +592,17 @@ public class ExamProcessActivity extends BaseActivity {
             mSerialPort = new SerialPort(new File("/dev/ttyAMA2"), 9600, 0);
             mInputStream = mSerialPort.getInputStream();
         } catch (SecurityException s) {
-            Log.e("Error", s + "");
+            Log.e("Error", "SecurityException:"+s);
         } catch (IOException i) {
-            Log.e("Error", i + "");
+            Log.e("Error", "IOException"+i);
         } catch (InvalidParameterException e) {
-            Log.e("Error", e + "");
+            Log.e("Error", "InvalidParameterException"+e);
         }
     }
 
+    /**
+     * 接收串口数据
+     */
     class SThread extends Thread {
         @Override
         public void run() {
@@ -664,14 +670,23 @@ public class ExamProcessActivity extends BaseActivity {
                 case 1:
                     SerialPortBean spb = (SerialPortBean) msg.obj;
                     if (spb != null) {
+
+                        //进行扣分评判
+                        BJudgment bJudgment = new BJudgment(spb);
+                        bJudgment.main();
+
+
                         tv_exam_mark_speed.setText(spb.getBf_speed() + "km/h");//车速
+
+                        //档位
                         if (spb.getBf_gear_info().equals("7")) {
                             tv_exam_mark_gear.setText("倒档");
                         } else if (spb.getBf_gear_info().equals("0")) {
                             tv_exam_mark_gear.setText("空档");
                         } else {
-                            tv_exam_mark_gear.setText(spb.getBf_gear_info());//档位
+                            tv_exam_mark_gear.setText(spb.getBf_gear_info());
                         }
+                        //转速
                         tv_exam_mark_rpm.setText(spb.getBf_rpm() + "r/min");
 
                         if (spb.getBf_engine_status().equals("03")) {
@@ -947,33 +962,32 @@ public class ExamProcessActivity extends BaseActivity {
 //                    //超声波距离信息2
 //                    tv_ultrasonic_two.setText(SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_ultrasonic_2", ""));
 
-
 //                    if (startExamC == 1) {
-                    parsetoXWCJ.getXWCJ();
+//                      parsetoXWCJ.getXWCJ();
 //                    }
 
                     //安全带判断
-                    if (!SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("")) {
-                        if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("02") && startExamC == 0) {
-                            if (!SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_belt_info", "").equals("40")) {
-                                index++;
-                                if (index == 1) {
-                                    if (!activityType.equals("trainTest")) {
-                                        fraction = 100;
-                                        list.add(new MarkingBean("上车准备", "100", "不按规定使用安全带!", "", "10101"));
-                                        markingAdapter.notifyDataSetChanged();
-                                        tv_exam_stu_passNum.setText(String.valueOf(list.size()));
-                                        lv_exam_mark_info.setSelection(markingAdapter.getCount());
-                                        showDialogForPass();
-                                        exitThread();
-                                    }
-                                }
-                            } else {
+//                    if (!SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("")) {
+//                        if (SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("02") && startExamC == 0) {
+//                            if (!SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_belt_info", "").equals("40")) {
+//                                index++;
+//                                if (index == 1) {
+//                                    if (!activityType.equals("trainTest")) {
+//                                        fraction = 100;
+//                                        list.add(new MarkingBean("上车准备", "100", "不按规定使用安全带!", "", "10101"));
+//                                        markingAdapter.notifyDataSetChanged();
+//                                        tv_exam_stu_passNum.setText(String.valueOf(list.size()));
+//                                        lv_exam_mark_info.setSelection(markingAdapter.getCount());
+//                                        showDialogForPass();
+//                                        exitThread();
+//                                    }
+//                                }
+//                            } else {
 //                                startExamC = 1;
 //                                parsetoXWCJ.getXWCJ();
-                            }
-                        }
-                    }
+//                            }
+//                        }
+//                    }
 
 //                    if (!SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", "").equals("")) {
 ////                        Log.e("TAG",SharedPrefsUtils.getValue(ExamProcessActivity.this, "bf_engine_status", ""));
@@ -1071,9 +1085,11 @@ public class ExamProcessActivity extends BaseActivity {
      * 线程的销毁
      */
     private void exitThread() {
+        //结束扣分判定
+        BParameter.ifStart = false;
+
         mapThreadBol = false;
         timeFlag = false;
-        serialPortThreadFlag = false;
         try {
             stopSerialPort();
         } catch (SecurityException s) {
@@ -1160,7 +1176,7 @@ public class ExamProcessActivity extends BaseActivity {
     /**
      * 五小项每一项的开始
      */
-    private void getStartExamination(String markingSubjrct) {
+    private void getStartExamination() {
 //        String param = "car_num=" + getCarNum() + "&sfzmhm=" + user.getUser_id_card() + "&timestamp=" + String.valueOf(System.currentTimeMillis())
 //                + "&ksxm=" + subject + "&kfxm=" + markingSubjrct + "&sbxh=" + getDeviceID();
         String param = "car_num=" + getCarNum() + "&sfzmhm=" + user.getUser_id_card() + "&timestamp=" + String.valueOf(System.currentTimeMillis())
@@ -1306,9 +1322,10 @@ public class ExamProcessActivity extends BaseActivity {
      * 停止串口
      */
     private void stopSerialPort() {
+        serialPortThreadFlag = false;
         SerialPortSendUtil serialPortSendUtil = new SerialPortSendUtil();
         serialPortSendUtil.sendMessage(new byte[]{0x55, (byte) 0xAA, 0x01, 0x00, 0x00});
-        stopService(SerialPortService.sIntent);
+//        stopService(SerialPortService.sIntent);
     }
 
     /**
@@ -1387,10 +1404,10 @@ public class ExamProcessActivity extends BaseActivity {
     /**
      * 连接练一练IP
      */
-    private void initTcp() {
-        TcpPresenter.getInstance().startReciveData();
-        sendMessageToCar();
-    }
+//    private void initTcp() {
+//        TcpPresenter.getInstance().startReciveData();
+//        sendMessageToCar();
+//    }
 
     /**
      * TcpMessage
@@ -1402,26 +1419,26 @@ public class ExamProcessActivity extends BaseActivity {
      *
      * @param obj
      */
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void onEventAsync(TcpMessage obj) {
-        Message message = new Message();
-        message.what = 0;
-        message.obj = obj.strMsg.toString();
-        handelr.sendMessage(message);
-    }
+//    @Subscribe(threadMode = ThreadMode.ASYNC)
+//    public void onEventAsync(TcpMessage obj) {
+//        Message message = new Message();
+//        message.what = 0;
+//        message.obj = obj.strMsg.toString();
+//        handelr.sendMessage(message);
+//    }
 
     /**
      * TcpMessage
      *
      * @param obj
      */
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void onEventAsync(tcpConnectState obj) {
-        Message message = new Message();
-        message.what = 0;
-        message.obj = obj.strMsg.toString();
-        handelr.sendMessage(message);
-    }
+//    @Subscribe(threadMode = ThreadMode.ASYNC)
+//    public void onEventAsync(tcpConnectState obj) {
+//        Message message = new Message();
+//        message.what = 0;
+//        message.obj = obj.strMsg.toString();
+//        handelr.sendMessage(message);
+//    }
 
     /**
      * 接收练一练信号信息
@@ -1439,26 +1456,6 @@ public class ExamProcessActivity extends BaseActivity {
             return false;
         }
     });
-
-    private void res(String strMsg) {
-        if (!TextUtils.isEmpty(strMsg) && strMsg.length() > 7) {
-            if (strMsg.indexOf("$xwtcp,set,exam_startwork,ok*ff") > -1) {
-//                String index = strMsg.substring(strMsg.indexOf("$xwtcp", 0), strMsg.indexOf("$xwtcp") + 20);
-//                tv1.setText(index);
-            }
-        }
-    }
-
-    private void xwtcp(String strMsg) {
-        if (!TextUtils.isEmpty(strMsg) && strMsg.length() > 7) {
-            if (strMsg.indexOf("$xwtcp,set,ok*ff") > -1) {
-                String index = strMsg.substring(strMsg.indexOf("$xwtcp"), strMsg.indexOf("$xwtcp") + 16);
-                if (index.equals("$xwtcp,set,ok*ff")) {
-                    tp.sendMsgToTcp("$xwtcp,set,exam_startwork*ff");
-                }
-            }
-        }
-    }
 
     /**
      * 发送开始信号给练一练
@@ -1605,7 +1602,7 @@ public class ExamProcessActivity extends BaseActivity {
                     } else {
 
                     }
-                    getStartExamination(proStr);
+                    getStartExamination();
                 }
             }
         }
@@ -1707,6 +1704,9 @@ public class ExamProcessActivity extends BaseActivity {
         }
     }
 
+    /**
+     * 地图展示及数据接收
+     */
     public class mapThread extends Thread {
         @Override
         public void run() {
@@ -1745,14 +1745,9 @@ public class ExamProcessActivity extends BaseActivity {
         @Override
         public void handleMessage(Message msg) {
             try {
-//                MyLog.i(TAG, "m_rev_handler接收到msg=" + msg.what);
                 if (msg.obj != null) {
                     String s = msg.obj.toString();
                     if (s.trim().length() > 0) {
-//                        MyLog.i(TAG, "m_rev_handler接收到obj=" + s);
-//                        MyLog.i(TAG, "开始更新UI");
-//                        tv1.append("Server:" + s);
-//                        MyLog.i(TAG, "更新UI完毕");
                     } else {
                         Log.i(TAG, "没有数据返回不更新");
                     }
@@ -1767,13 +1762,10 @@ public class ExamProcessActivity extends BaseActivity {
         @Override
         public void handleMessage(Message msg) {
             try {
-//                MyLog.i(TAG, "m_sent_handler接收到msg.what=" + msg.what);
                 String s = msg.obj.toString();
                 if (msg.what == 1) {
                     MyLog.i(TAG, "发送成功");
-//                    tv1.append("\n ME: " + s + "      发送成功");
                 } else {
-//                    tv1.append("\n ME: " + s + "     发送失败");
                 }
             } catch (Exception ee) {
                 MyLog.i(TAG, "加载过程出现异常");
